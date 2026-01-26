@@ -12,6 +12,9 @@ export const getAllShifts = async (req: AuthRequest, res: Response) => {
     const [rows] = await pool.query<RowDataPacket[]>(
       `SELECT 
         s.*, 
+        DATE(s.start_datetime) as date,
+        TIME_FORMAT(s.start_datetime, '%H:%i') as start_time,
+        TIME_FORMAT(s.end_datetime, '%H:%i') as end_time,
         p.name as project_name,
         GROUP_CONCAT(DISTINCT CONCAT(u.first_name, ' ', u.last_name) SEPARATOR ', ') as worker_names,
         JSON_ARRAYAGG(
@@ -27,7 +30,7 @@ export const getAllShifts = async (req: AuthRequest, res: Response) => {
       LEFT JOIN shift_workers sw ON sw.shift_id = s.id
       LEFT JOIN users u ON sw.user_id = u.id
       GROUP BY s.id
-      ORDER BY s.date DESC, s.start_time DESC, s.start_datetime DESC`
+      ORDER BY s.start_datetime DESC`
     );
 
     const shifts = (rows as any[]).map((row) => {
@@ -59,6 +62,12 @@ export const createShift = async (req: AuthRequest, res: Response) => {
   try {
     const { project_id, user_ids, date, start_time, end_time, name, description, status } = req.body;
 
+    console.log('📝 Creating shift:', { project_id, user_ids, date, start_time, end_time });
+
+    if (!project_id || !date || !start_time || !end_time) {
+      return res.status(400).json({ message: 'Všechna pole jsou povinná' });
+    }
+
     if (!Array.isArray(user_ids) || user_ids.length === 0) {
       return res.status(400).json({ message: 'Vyberte alespoň jednoho pracovníka' });
     }
@@ -68,9 +77,9 @@ export const createShift = async (req: AuthRequest, res: Response) => {
     const shiftName = name || `Směna ${date}`;
 
     const [result] = await pool.query<ResultSetHeader>(
-      `INSERT INTO shifts (name, project_id, date, start_time, end_time, start_datetime, end_datetime, description, status, created_by) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [shiftName, project_id, date, start_time, end_time, startDateTime, endDateTime, description || null, status || 'planned', req.user!.id]
+      `INSERT INTO shifts (name, project_id, start_datetime, end_datetime, description, status, created_by) 
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [shiftName, project_id, startDateTime, endDateTime, description || null, status || 'planned', req.user!.id]
     );
 
     const shiftId = result.insertId;
@@ -82,13 +91,14 @@ export const createShift = async (req: AuthRequest, res: Response) => {
       );
     }
 
+    console.log('✅ Shift created successfully:', shiftId);
     res.status(201).json({ 
       id: shiftId, 
       message: 'Směna byla úspěšně vytvořena' 
     });
   } catch (error: any) {
-    console.error('Chyba při vytváření směny:', error);
-    res.status(500).json({ message: 'Chyba serveru' });
+    console.error('❌ Chyba při vytváření směny:', error);
+    res.status(500).json({ message: 'Chyba serveru', details: error.message });
   }
 };
 
@@ -111,9 +121,9 @@ export const updateShift = async (req: AuthRequest, res: Response) => {
 
     await pool.query(
       `UPDATE shifts 
-       SET name = ?, project_id = ?, date = ?, start_time = ?, end_time = ?, start_datetime = ?, end_datetime = ?, description = ?, status = ?, updated_by = ?
+       SET name = ?, project_id = ?, start_datetime = ?, end_datetime = ?, description = ?, status = ?, updated_by = ?
        WHERE id = ?`,
-      [name || `Směna ${date}`, project_id, date, start_time, end_time, startDateTime, endDateTime, description || null, status || 'planned', req.user?.id || null, shiftId]
+      [name || `Směna ${date}`, project_id, startDateTime, endDateTime, description || null, status || 'planned', req.user?.id || null, shiftId]
     );
 
     await pool.query('DELETE FROM shift_workers WHERE shift_id = ?', [shiftId]);
@@ -156,6 +166,9 @@ export const getShiftById = async (req: AuthRequest, res: Response) => {
     const [rows] = await pool.query<RowDataPacket[]>(
       `SELECT 
         s.*, 
+        DATE(s.start_datetime) as date,
+        TIME_FORMAT(s.start_datetime, '%H:%i') as start_time,
+        TIME_FORMAT(s.end_datetime, '%H:%i') as end_time,
         p.name as project_name,
         GROUP_CONCAT(DISTINCT CONCAT(u.first_name, ' ', u.last_name) SEPARATOR ', ') as worker_names,
         JSON_ARRAYAGG(
