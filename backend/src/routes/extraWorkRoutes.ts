@@ -6,7 +6,9 @@ import {
   submitExtraWorkToManager,
   approveExtraWork,
   getExtraWorkById,
-  getAllExtraWorks
+  getAllExtraWorks,
+  returnExtraWorkToWorker,
+  returnExtraWorkToForeman
 } from '../controllers/extraWorkController';
 import { authenticate, authorize } from '../middleware/auth';
 import { upload } from '../middleware/upload';
@@ -18,6 +20,8 @@ router.post('/:id/submit-to-foreman', authenticate, authorize('worker'), submitE
 router.post('/:id/materials', authenticate, authorize('foreman'), addMaterialsToExtraWork);
 router.post('/:id/submit-to-manager', authenticate, authorize('foreman'), submitExtraWorkToManager);
 router.post('/:id/approve', authenticate, authorize('manager'), approveExtraWork);
+router.post('/:id/return-to-worker', authenticate, authorize('foreman'), returnExtraWorkToWorker);
+router.post('/:id/return-to-foreman', authenticate, authorize('manager'), returnExtraWorkToForeman);
 router.get('/:id', authenticate, getExtraWorkById);
 router.get('/', authenticate, getAllExtraWorks);
 

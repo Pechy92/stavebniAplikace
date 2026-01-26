@@ -31,10 +31,12 @@ export const createExtraWork = async (req: AuthRequest, res: Response) => {
     // Přidat fotografie pokud existují
     if (req.files && Array.isArray(req.files)) {
       for (const file of req.files) {
+        // Uložit cestu bez počátečního 'uploads/' - bude se přidávat při servování
+        const filePath = '/' + file.path.replace(/\\/g, '/');
         await connection.query(
           `INSERT INTO extra_work_photos (extra_work_id, file_path, file_name, file_size, mime_type, uploaded_by)
            VALUES (?, ?, ?, ?, ?, ?)`,
-          [extraWorkId, file.path, file.originalname, file.size, file.mimetype, workerId]
+          [extraWorkId, filePath, file.originalname, file.size, file.mimetype, workerId]
         );
       }
     }
@@ -73,6 +75,11 @@ export const submitExtraWorkToForeman = async (req: AuthRequest, res: Response) 
     );
     const extraWork = (extraWorks as any[])[0];
 
+    // Povolit znovuodeslání jen z draft / returned_to_worker
+    if (!['draft', 'returned_to_worker'].includes(extraWork.status)) {
+      return res.status(400).json({ error: 'Vícepráce nemůže být odeslána z tohoto stavu' });
+    }
+
     const [foremen] = await connection.query(
       `SELECT u.email FROM users u 
        JOIN project_foremen pf ON u.id = pf.foreman_id 
@@ -88,11 +95,11 @@ export const submitExtraWorkToForeman = async (req: AuthRequest, res: Response) 
       [req.user?.id, id]
     );
 
-    // Přidat do historie
+    // Přidat do historie se správným původním stavem
     await connection.query(
       `INSERT INTO extra_work_history (extra_work_id, action, status_from, status_to, user_id)
-       VALUES (?, 'submitted', 'draft', 'submitted_to_foreman', ?)`,
-      [id, req.user?.id]
+       VALUES (?, 'submitted', ?, 'submitted_to_foreman', ?)`,
+      [id, extraWork.status, req.user?.id]
     );
 
     await connection.commit();
@@ -175,6 +182,11 @@ export const submitExtraWorkToManager = async (req: AuthRequest, res: Response) 
     );
     const extraWork = (extraWorks as any[])[0];
 
+    // Povolit znovuodeslání z submitted_to_foreman i returned_to_foreman
+    if (!['submitted_to_foreman', 'returned_to_foreman'].includes(extraWork.status)) {
+      return res.status(400).json({ error: 'Vícepráce nemůže být odeslána manažerovi z tohoto stavu' });
+    }
+
     const [managers] = await connection.query(
       `SELECT u.email FROM users u 
        JOIN project_managers pm ON u.id = pm.manager_id 
@@ -191,8 +203,8 @@ export const submitExtraWorkToManager = async (req: AuthRequest, res: Response) 
 
     await connection.query(
       `INSERT INTO extra_work_history (extra_work_id, action, status_from, status_to, user_id)
-       VALUES (?, 'submitted', 'submitted_to_foreman', 'submitted_to_manager', ?)`,
-      [id, req.user?.id]
+       VALUES (?, 'submitted', ?, 'submitted_to_manager', ?)`,
+      [id, extraWork.status, req.user?.id]
     );
 
     await connection.commit();
@@ -316,7 +328,14 @@ export const getExtraWorkById = async (req: AuthRequest, res: Response) => {
       ORDER BY ewh.action_datetime DESC
     `, [id]);
 
-    res.json({ ...extraWork, photos, materials, history });
+    // Připravit komentáře pro frontend (důvody vrácení atd.)
+    const comments = (history as any[]).map((item) => ({
+      author_name: item.first_name && item.last_name ? `${item.first_name} ${item.last_name}` : 'Systém',
+      created_at: item.action_datetime,
+      comment: item.note || item.action
+    }));
+
+    res.json({ ...extraWork, photos, materials, history, comments });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Chyba při načítání vícepráce' });
@@ -363,5 +382,139 @@ export const getAllExtraWorks = async (req: AuthRequest, res: Response) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Chyba při načítání víceprací' });
+  }
+};
+
+export const returnExtraWorkToWorker = async (req: AuthRequest, res: Response) => {
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    const { id } = req.params;
+    const { comment } = req.body;
+
+    const [extraWorks] = await connection.query(
+      'SELECT ew.*, u.email as worker_email FROM extra_work ew JOIN users u ON ew.worker_id = u.id WHERE ew.id = ?',
+      [id]
+    );
+    const extraWork = (extraWorks as any[])[0];
+
+    if (extraWork.status !== 'submitted_to_foreman') {
+      return res.status(400).json({ error: 'Vícepráce nemůže být vrácena z tohoto stavu' });
+    }
+
+    await connection.query(
+      `UPDATE extra_work SET status = 'returned_to_worker', updated_by = ? WHERE id = ?`,
+      [req.user?.id, id]
+    );
+
+    await connection.query(
+      `INSERT INTO extra_work_history (extra_work_id, action, status_from, status_to, user_id, note)
+       VALUES (?, 'returned', 'submitted_to_foreman', 'returned_to_worker', ?, ?)`,
+      [id, req.user?.id, comment || '']
+    );
+
+    // Vytvořit notifikaci
+    await connection.query(
+      `INSERT INTO notifications (user_id, title, message, type, entity_type, entity_id, action_url)
+       VALUES (?, ?, ?, 'warning', 'extra_work', ?, ?)`,
+      [extraWork.worker_id, 'Vícepráce vrácena', `Vícepráce ${extraWork.name || extraWork.custom_id} byla vrácena stavbyvedoucím. ${comment ? 'Důvod: ' + comment : ''}`, id, `/extra-work/${id}`]
+    );
+
+    await connection.commit();
+
+    // Email notifikace (optional - wrapped in try-catch)
+    try {
+      await sendEmail({
+        to: extraWork.worker_email,
+        subject: `Vícepráce vrácena: ${extraWork.name || extraWork.custom_id}`,
+        html: `<p>Vícepráce <strong>${extraWork.name || extraWork.custom_id}</strong> byla vrácena stavbyvedoucím.</p>${comment ? `<p><strong>Důvod:</strong> ${comment}</p>` : ''}`,
+        notificationType: 'extra_work_returned',
+        relatedEntityType: 'extra_work',
+        relatedEntityId: parseInt(id)
+      });
+    } catch (emailError) {
+      console.error('Email se nepodařilo odeslat:', emailError);
+    }
+
+    res.json({ message: 'Vícepráce vrácena dělníkovi' });
+  } catch (error) {
+    await connection.rollback();
+    console.error(error);
+    res.status(500).json({ error: 'Chyba při vrácení vícepráce' });
+  } finally {
+    connection.release();
+  }
+};
+
+export const returnExtraWorkToForeman = async (req: AuthRequest, res: Response) => {
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    const { id } = req.params;
+    const { comment } = req.body;
+
+    const [extraWorks] = await connection.query(
+      `SELECT ew.*, creator.email as foreman_email, creator.id as foreman_id FROM extra_work ew 
+       LEFT JOIN users creator ON ew.created_by = creator.id 
+       WHERE ew.id = ? LIMIT 1`,
+      [id]
+    );
+    const extraWork = (extraWorks as any[])[0];
+
+    if (!extraWork) {
+      return res.status(404).json({ error: 'Vícepráce nenalezena' });
+    }
+
+    if (extraWork.status !== 'submitted_to_manager') {
+      return res.status(400).json({ error: 'Vícepráce nemůže být vrácena z tohoto stavu' });
+    }
+
+    await connection.query(
+      `UPDATE extra_work SET status = 'returned_to_foreman', updated_by = ? WHERE id = ?`,
+      [req.user?.id, id]
+    );
+
+    await connection.query(
+      `INSERT INTO extra_work_history (extra_work_id, action, status_from, status_to, user_id, note)
+       VALUES (?, 'returned', 'submitted_to_manager', 'returned_to_foreman', ?, ?)`,
+      [id, req.user?.id, comment || '']
+    );
+
+    // Vytvořit notifikaci stavbyvedoucímu (creator)
+    if (extraWork.foreman_id) {
+      await connection.query(
+        `INSERT INTO notifications (user_id, title, message, type, entity_type, entity_id, action_url)
+         VALUES (?, ?, ?, 'warning', 'extra_work', ?, ?)`,
+        [extraWork.foreman_id, 'Vícepráce vrácena', `Vícepráce ${extraWork.name || extraWork.custom_id} byla vrácena manažerem. ${comment ? 'Důvod: ' + comment : ''}`, id, `/extra-work/${id}`]
+      );
+    }
+
+    await connection.commit();
+
+    // Email notifikace (optional)
+    if (extraWork.foreman_email) {
+      try {
+        await sendEmail({
+          to: extraWork.foreman_email,
+          subject: `Vícepráce vrácena: ${extraWork.name || extraWork.custom_id}`,
+          html: `<p>Vícepráce <strong>${extraWork.name || extraWork.custom_id}</strong> byla vrácena manažerem.</p>${comment ? `<p><strong>Důvod:</strong> ${comment}</p>` : ''}`,
+          notificationType: 'extra_work_returned',
+          relatedEntityType: 'extra_work',
+          relatedEntityId: parseInt(id)
+        });
+      } catch (emailError) {
+        console.error('Email se nepodařilo odeslat:', emailError);
+      }
+    }
+
+    res.json({ message: 'Vícepráce vrácena stavbyvedoucímu' });
+  } catch (error) {
+    await connection.rollback();
+    console.error(error);
+    res.status(500).json({ error: 'Chyba při vrácení vícepráce' });
+  } finally {
+    connection.release();
   }
 };

@@ -265,6 +265,27 @@ export async function createTables() {
       )
     `);
 
+    // Notifications table (in-app)
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS notifications (
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        user_id INT NOT NULL,
+        title VARCHAR(255) NOT NULL,
+        message TEXT,
+        type ENUM('info', 'warning', 'success', 'error') DEFAULT 'info',
+        entity_type VARCHAR(50),
+        entity_id INT,
+        is_read BOOLEAN DEFAULT FALSE,
+        action_url VARCHAR(500),
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        read_at DATETIME,
+        INDEX idx_user_id (user_id),
+        INDEX idx_created_at (created_at),
+        INDEX idx_is_read (is_read),
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      )
+    `);
+
     console.log('✅ Všechny tabulky byly úspěšně vytvořeny');
   } catch (error) {
     console.error('❌ Chyba při vytváření tabulek:', error);

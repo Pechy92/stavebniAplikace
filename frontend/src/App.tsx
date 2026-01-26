@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import PrivateRoute from './components/PrivateRoute';
 import Layout from './components/Layout';
 import Login from './pages/Login';
@@ -12,7 +13,9 @@ import ExtraWorkForm from './pages/ExtraWorkForm';
 import AddMaterialsToExtraWork from './pages/AddMaterialsToExtraWork';
 import ShiftsList from './pages/ShiftsList';
 import ShiftForm from './pages/ShiftForm';
+import ShiftDetail from './pages/ShiftDetail';
 import Admin from './pages/Admin';
+import { Notifications } from './pages/Notifications';
 import './index.css';
 
 const queryClient = new QueryClient();
@@ -21,7 +24,8 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <BrowserRouter>
+        <ThemeProvider>
+          <BrowserRouter>
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
@@ -42,10 +46,14 @@ function App() {
               <Route path="extra-work/:id" element={<ExtraWorkDetail />} />
               <Route path="shifts" element={<ShiftsList />} />
               <Route path="shifts/new" element={<ShiftForm />} />
+              <Route path="shifts/:id/edit" element={<ShiftForm />} />
+              <Route path="shifts/:id" element={<ShiftDetail />} />
+              <Route path="notifications" element={<Notifications />} />
               <Route path="admin" element={<Admin />} />
             </Route>
           </Routes>
         </BrowserRouter>
+        </ThemeProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

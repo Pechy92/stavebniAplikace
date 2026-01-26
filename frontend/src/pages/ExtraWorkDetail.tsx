@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { extraWorkService } from '../services';
+import { translationService } from '../services/translationService';
+import { generateExtraWorkPDF } from '../services/pdfService';
 import { ExtraWork } from '../types';
 
 const ExtraWorkDetail: React.FC = () => {
@@ -10,6 +12,18 @@ const ExtraWorkDetail: React.FC = () => {
   const [extraWork, setExtraWork] = useState<ExtraWork | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  const [showReturnModal, setShowReturnModal] = useState(false);
+  const [returnComment, setReturnComment] = useState('');
+  const [translations, setTranslations] = useState<{
+    name?: string;
+    description?: string;
+    materialDescription?: string;
+  }>({});
+  const [translating, setTranslating] = useState<{
+    name?: boolean;
+    description?: boolean;
+    materialDescription?: boolean;
+  }>({});
 
   useEffect(() => {
     loadExtraWork();
@@ -27,7 +41,30 @@ const ExtraWorkDetail: React.FC = () => {
     }
   };
 
-  const handleAction = async (action: 'submit' | 'approve' | 'forward') => {
+  const handleTranslate = async (field: 'name' | 'description' | 'materialDescription', text: string) => {
+    setTranslating({ ...translating, [field]: true });
+    try {
+      const translated = await translationService.translateToCzech(text);
+      setTranslations({ ...translations, [field]: translated });
+    } catch (error) {
+      console.error('Chyba při překladu:', error);
+      alert('Překlad se nezdařil');
+    } finally {
+      setTranslating({ ...translating, [field]: false });
+    }
+  };
+
+  const handleDownloadPDF = async () => {
+    if (!extraWork) return;
+    try {
+      await generateExtraWorkPDF(extraWork);
+    } catch (error) {
+      console.error('Chyba při generování PDF:', error);
+      alert('Generování PDF se nezdařilo');
+    }
+  };
+
+  const handleAction = async (action: 'submit' | 'approve' | 'forward' | 'return') => {
     if (!extraWork) return;
     
     try {
@@ -41,6 +78,15 @@ const ExtraWorkDetail: React.FC = () => {
       } else if (action === 'forward') {
         // Foreman forwards to manager
         await extraWorkService.submitToManager(extraWork.id);
+      } else if (action === 'return') {
+        // Return logic
+        if (extraWork.status === 'submitted_to_foreman' && user?.role === 'foreman') {
+          await extraWorkService.returnToWorker(extraWork.id, returnComment);
+        } else if (extraWork.status === 'submitted_to_manager' && user?.role === 'manager') {
+          await extraWorkService.returnToForeman(extraWork.id, returnComment);
+        }
+        setShowReturnModal(false);
+        setReturnComment('');
       }
       
       await loadExtraWork();
@@ -87,11 +133,11 @@ const ExtraWorkDetail: React.FC = () => {
   };
 
   const canSubmit = () => {
-    return user?.role === 'worker' && extraWork?.status === 'draft';
+    return user?.role === 'worker' && ['draft', 'returned_to_worker'].includes(extraWork?.status || '');
   };
 
   const canApproveForeman = () => {
-    return user?.role === 'foreman' && extraWork?.status === 'submitted_to_foreman';
+    return user?.role === 'foreman' && ['submitted_to_foreman', 'returned_to_foreman'].includes(extraWork?.status || '');
   };
 
   const canApproveManager = () => {
@@ -101,7 +147,7 @@ const ExtraWorkDetail: React.FC = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="text-gray-500">Načítám vícepráci...</div>
+        <div className="text-gray-500 dark:text-gray-400">Načítám vícepráci...</div>
       </div>
     );
   }
@@ -109,7 +155,7 @@ const ExtraWorkDetail: React.FC = () => {
   if (!extraWork) {
     return (
       <div className="text-center py-12">
-        <h3 className="text-lg font-medium text-gray-900">Vícepráce nenalezena</h3>
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white">Vícepráce nenalezena</h3>
         <Link to="/extra-work" className="mt-4 text-primary hover:text-primary-dark">
           Zpět na seznam
         </Link>
@@ -119,19 +165,30 @@ const ExtraWorkDetail: React.FC = () => {
 
   return (
     <div>
-      <div className="mb-6">
+      <div className="mb-6 flex items-center justify-between">
         <Link to="/extra-work" className="text-primary hover:text-primary-dark text-sm font-medium">
           ← Zpět na seznam
         </Link>
+        {user?.role === 'manager' && (
+          <button
+            onClick={handleDownloadPDF}
+            className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Stáhnout PDF
+          </button>
+        )}
       </div>
 
-      <div className="bg-white shadow rounded-lg overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
         {/* Header */}
         <div className="px-6 py-5 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">{extraWork.custom_id}</h1>
-              <p className="mt-1 text-sm text-gray-500">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{extraWork.custom_id}</h1>
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                 Vytvořeno {formatDate(extraWork.created_at)}
               </p>
             </div>
@@ -149,33 +206,69 @@ const ExtraWorkDetail: React.FC = () => {
             <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {extraWork.name && (
                 <div>
-                  <dt className="text-sm font-medium text-gray-500">Název vícepráce</dt>
-                  <dd className="mt-1 text-sm text-gray-900">{extraWork.name}</dd>
+                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                    Název vícepráce
+                    {translationService.isUkrainian(extraWork.name) && (
+                      <button
+                        onClick={() => handleTranslate('name', extraWork.name!)}
+                        disabled={translating.name}
+                        className="text-xs text-primary hover:text-primary-dark disabled:opacity-50"
+                      >
+                        {translating.name ? 'Překládám...' : 'Přeložit'}
+                      </button>
+                    )}
+                  </dt>
+                  <dd className="mt-1 text-sm text-gray-900 dark:text-white">
+                    {extraWork.name}
+                    {translations.name && (
+                      <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded text-blue-700 dark:text-blue-300">
+                        <span className="font-medium">Překlad: </span>{translations.name}
+                      </div>
+                    )}
+                  </dd>
                 </div>
               )}
               <div>
-                <dt className="text-sm font-medium text-gray-500">Popis</dt>
-                <dd className="mt-1 text-sm text-gray-900">{extraWork.description}</dd>
+                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                  Popis
+                  {translationService.isUkrainian(extraWork.description) && (
+                    <button
+                      onClick={() => handleTranslate('description', extraWork.description)}
+                      disabled={translating.description}
+                      className="text-xs text-primary hover:text-primary-dark disabled:opacity-50"
+                    >
+                      {translating.description ? 'Překládám...' : 'Přeložit'}
+                    </button>
+                  )}
+                </dt>
+                <dd className="mt-1 text-sm text-gray-900 dark:text-white">
+                  {extraWork.description}
+                  {translations.description && (
+                    <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded text-blue-700 dark:text-blue-300">
+                      <span className="font-medium">Překlad: </span>{translations.description}
+                    </div>
+                  )}
+                </dd>
               </div>
               <div>
-                <dt className="text-sm font-medium text-gray-500">Projekt</dt>
-                <dd className="mt-1 text-sm text-gray-900">{extraWork.project_name}</dd>
+                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Projekt</dt>
+                <dd className="mt-1 text-sm text-gray-900 dark:text-white">{extraWork.project_name}</dd>
               </div>
               <div>
-                <dt className="text-sm font-medium text-gray-500">Vytvořil</dt>
-                <dd className="mt-1 text-sm text-gray-900">
+                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Vytvořil</dt>
+                <dd className="mt-1 text-sm text-gray-900 dark:text-white">
                   {extraWork.created_by_first_name} {extraWork.created_by_last_name}
                 </dd>
               </div>
               {extraWork.duration_hours && (
                 <div>
-                  <dt className="text-sm font-medium text-gray-500">Doba trvání</dt>
-                  <dd className="mt-1 text-sm text-gray-900">{extraWork.duration_hours} hodin</dd>
+                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Doba trvání</dt>
+                  <dd className="mt-1 text-sm text-gray-900 dark:text-white">{extraWork.duration_hours} hodin</dd>
                 </div>
               )}
               <div>
-                <dt className="text-sm font-medium text-gray-500">Datum vytvoření</dt>
-                <dd className="mt-1 text-sm text-gray-900">{formatDate(extraWork.created_at)}</dd>
+                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Datum vytvoření</dt>
+                <dd className="mt-1 text-sm text-gray-900 dark:text-white">{formatDate(extraWork.created_at)}</dd>
               </div>
             </dl>
           </div>
@@ -209,9 +302,26 @@ const ExtraWorkDetail: React.FC = () => {
           {/* Materiály - textový popis od dělníka */}
           {extraWork.material_description_text && (
             <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Popis použitých materiálů (od dělníka)</h3>
-              <div className="bg-gray-50 rounded-lg p-4">
-                <p className="text-sm text-gray-900 whitespace-pre-line">{extraWork.material_description_text}</p>
+              <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
+                Popis použitých materiálů (od dělníka)
+                {translationService.isUkrainian(extraWork.material_description_text) && (
+                  <button
+                    onClick={() => handleTranslate('materialDescription', extraWork.material_description_text)}
+                    disabled={translating.materialDescription}
+                    className="text-xs text-primary hover:text-primary-dark disabled:opacity-50"
+                  >
+                    {translating.materialDescription ? 'Překládám...' : 'Přeložit'}
+                  </button>
+                )}
+              </h3>
+              <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                <p className="text-sm text-gray-900 dark:text-white whitespace-pre-line">{extraWork.material_description_text}</p>
+                {translations.materialDescription && (
+                  <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+                    <p className="text-sm font-medium text-blue-700 dark:text-blue-300 mb-1">Překlad:</p>
+                    <p className="text-sm text-blue-900 dark:text-blue-200 whitespace-pre-line">{translations.materialDescription}</p>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -221,19 +331,19 @@ const ExtraWorkDetail: React.FC = () => {
             <div>
               <h3 className="text-lg font-medium text-gray-900 mb-4">Přesné přiřazení materiálů (stavbyvedoucí)</h3>
               <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+                <thead className="bg-gray-50 dark:bg-gray-700">
                   <tr>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Materiál</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Množství</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jednotka</th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                   {extraWork.materials.map((material: any, index: number) => (
                     <tr key={index}>
-                      <td className="px-4 py-3 text-sm text-gray-900">{material.name}</td>
-                      <td className="px-4 py-3 text-sm text-gray-900">{material.quantity}</td>
-                      <td className="px-4 py-3 text-sm text-gray-500">{material.unit}</td>
+                      <td className="px-4 py-3 text-sm text-gray-900 dark:text-white">{material.name}</td>
+                      <td className="px-4 py-3 text-sm text-gray-900 dark:text-white">{material.quantity}</td>
+                      <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{material.unit}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -249,10 +359,10 @@ const ExtraWorkDetail: React.FC = () => {
                 {extraWork.comments.map((comment: any, index: number) => (
                   <div key={index} className="bg-gray-50 rounded-lg p-4">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-gray-900">{comment.author_name}</span>
-                      <span className="text-xs text-gray-500">{formatDate(comment.created_at)}</span>
+                      <span className="text-sm font-medium text-gray-900 dark:text-white">{comment.author_name}</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">{formatDate(comment.created_at)}</span>
                     </div>
-                    <p className="text-sm text-gray-700">{comment.comment}</p>
+                    <p className="text-sm text-gray-700 dark:text-gray-300">{comment.comment}</p>
                   </div>
                 ))}
               </div>
@@ -299,6 +409,13 @@ const ExtraWorkDetail: React.FC = () => {
                     >
                       {actionLoading ? 'Zpracovávám...' : user?.role === 'foreman' ? 'Postoupit manažerovi' : 'Schválit'}
                     </button>
+                    <button
+                      onClick={() => setShowReturnModal(true)}
+                      disabled={actionLoading}
+                      className="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
+                    >
+                      Vrátit
+                    </button>
                   </div>
                 </div>
               )}
@@ -306,6 +423,47 @@ const ExtraWorkDetail: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Return Modal */}
+      {showReturnModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white">Vrátit vícepráci</h3>
+            </div>
+            <div className="px-6 py-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Důvod vrácení
+              </label>
+              <textarea
+                value={returnComment}
+                onChange={(e) => setReturnComment(e.target.value)}
+                placeholder="Vysvětlete, proč vrací tuto vícepráci..."
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                rows={4}
+              />
+            </div>
+            <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+              <button
+                onClick={() => {
+                  setShowReturnModal(false);
+                  setReturnComment('');
+                }}
+                className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 dark:bg-gray-700"
+              >
+                Zrušit
+              </button>
+              <button
+                onClick={() => handleAction('return')}
+                disabled={actionLoading || !returnComment.trim()}
+                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 disabled:opacity-50"
+              >
+                {actionLoading ? 'Vracím...' : 'Vrátit'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

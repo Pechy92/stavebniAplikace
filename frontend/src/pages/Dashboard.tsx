@@ -3,9 +3,11 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { extraWorkService } from '../services';
 import { ExtraWork } from '../types';
+import { useTranslation } from 'react-i18next';
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [extraWorks, setExtraWorks] = useState<ExtraWork[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -25,15 +27,7 @@ const Dashboard: React.FC = () => {
   };
 
   const getStatusText = (status: string) => {
-    const statusTexts: { [key: string]: string } = {
-      'draft': 'Koncept',
-      'submitted_to_foreman': 'U stavbyvedoucího',
-      'returned_to_worker': 'Vráceno k dopracování',
-      'submitted_to_manager': 'U manažera',
-      'returned_to_foreman': 'Vráceno stavbyvedoucímu',
-      'approved': 'Schváleno'
-    };
-    return statusTexts[status] || status;
+    return t(`extraWork.statuses.${status}`, status);
   };
 
   const getStatusColor = (status: string) => {
@@ -51,11 +45,11 @@ const Dashboard: React.FC = () => {
   return (
     <div className="px-4 sm:px-0">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">
-          Vítejte, {user?.firstName} {user?.lastName}
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+          {t('dashboard.welcome')}, {user?.firstName} {user?.lastName}
         </h1>
         <p className="mt-2 text-gray-600">
-          Role: {user?.role === 'admin' ? 'Administrátor' : user?.role === 'manager' ? 'Manažer' : user?.role === 'foreman' ? 'Stavbyvedoucí' : 'Dělník'}
+          {t('dashboard.role')}: {t(`dashboard.roles.${user?.role}`)}
         </p>
       </div>
 
@@ -63,7 +57,7 @@ const Dashboard: React.FC = () => {
         {user?.role === 'worker' && (
           <Link
             to="/extra-work/new"
-            className="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow"
+            className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow"
           >
             <div className="p-5">
               <div className="flex items-center">
@@ -75,10 +69,10 @@ const Dashboard: React.FC = () => {
                 <div className="ml-5 w-0 flex-1">
                   <dl>
                     <dt className="text-sm font-medium text-gray-500 truncate">
-                      Nová vícepráce
+                      {t('dashboard.newExtraWork')}
                     </dt>
-                    <dd className="text-lg font-medium text-gray-900">
-                      Vytvořit
+                    <dd className="text-lg font-medium text-gray-900 dark:text-white">
+                      {t('dashboard.create')}
                     </dd>
                   </dl>
                 </div>
@@ -101,10 +95,10 @@ const Dashboard: React.FC = () => {
               <div className="ml-5 w-0 flex-1">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate">
-                    Všechny vícepráce
+                    {t('dashboard.allExtraWork')}
                   </dt>
-                  <dd className="text-lg font-medium text-gray-900">
-                    Zobrazit
+                  <dd className="text-lg font-medium text-gray-900 dark:text-white">
+                    {t('dashboard.view')}
                   </dd>
                 </dl>
               </div>
@@ -126,10 +120,10 @@ const Dashboard: React.FC = () => {
               <div className="ml-5 w-0 flex-1">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate">
-                    Směny
+                    {t('shifts.title')}
                   </dt>
-                  <dd className="text-lg font-medium text-gray-900">
-                    Zobrazit
+                  <dd className="text-lg font-medium text-gray-900 dark:text-white">
+                    {t('dashboard.view')}
                   </dd>
                 </dl>
               </div>
@@ -138,17 +132,17 @@ const Dashboard: React.FC = () => {
         </Link>
       </div>
 
-      <div className="bg-white shadow overflow-hidden sm:rounded-lg">
+      <div className="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg">
         <div className="px-4 py-5 sm:px-6">
-          <h3 className="text-lg leading-6 font-medium text-gray-900">
-            Poslední vícepráce
+          <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white">
+            {t('dashboard.recentExtraWork')}
           </h3>
         </div>
         <div className="border-t border-gray-200">
           {loading ? (
-            <div className="p-4 text-center">Načítání...</div>
+            <div className="p-4 text-center">{t('dashboard.loading')}</div>
           ) : extraWorks.length === 0 ? (
-            <div className="p-4 text-center text-gray-500">Žádné vícepráce</div>
+            <div className="p-4 text-center text-gray-500 dark:text-gray-400">{t('dashboard.noExtraWork')}</div>
           ) : (
             <ul className="divide-y divide-gray-200">
               {extraWorks.map((extraWork) => (
@@ -170,13 +164,13 @@ const Dashboard: React.FC = () => {
                       </div>
                       <div className="mt-2 sm:flex sm:justify-between">
                         <div className="sm:flex">
-                          <p className="flex items-center text-sm text-gray-500">
-                            {extraWork.project_name || 'Bez projektu'}
+                          <p className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                            {extraWork.project_name || t('dashboard.withoutProject')}
                           </p>
                         </div>
                         <div className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
                           <p>
-                            {extraWork.created_at ? new Date(extraWork.created_at).toLocaleDateString('cs-CZ') : 'Bez data'}
+                            {extraWork.created_at ? new Date(extraWork.created_at).toLocaleDateString('cs-CZ') : t('dashboard.withoutDate')}
                           </p>
                         </div>
                       </div>

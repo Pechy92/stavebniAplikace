@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import axios from 'axios';
+import { extraWorkService, projectService } from '../services';
 
 interface Project {
   id: number;
@@ -33,11 +33,8 @@ const ExtraWorkForm: React.FC = () => {
 
   const loadProjects = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:3001/api/projects', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setProjects(response.data);
+      const data = await projectService.getAll();
+      setProjects(data);
     } catch (error) {
       console.error('Chyba při načítání projektů:', error);
     }
@@ -63,10 +60,13 @@ const ExtraWorkForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.projectId || !formData.name || !formData.description) return;
+    if (!formData.projectId || !formData.name || !formData.description) {
+      alert('Vyplňte prosím všechna povinná pole (Projekt, Název, Popis)');
+      console.log('Validace selhala:', { projectId: formData.projectId, name: formData.name, description: formData.description });
+      return;
+    }
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
       const data = new FormData();
       data.append('project_id', formData.projectId);
       data.append('name', formData.name);
@@ -76,11 +76,9 @@ const ExtraWorkForm: React.FC = () => {
       if (formData.materialText) data.append('material_description_text', formData.materialText);
       photos.forEach(photo => data.append('photos', photo));
 
-      const response = await axios.post('http://localhost:3001/api/extra-work', data, {
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }
-      });
+      const response = await extraWorkService.create(data);
       alert('Vícepráce byla úspěšně vytvořena');
-      navigate(`/extra-work/${response.data.id}`);
+      navigate(`/extra-work/${response.id}`);
     } catch (error: any) {
       console.error('Chyba při vytváření vícepráce:', error);
       alert(error.response?.data?.message || 'Chyba při vytváření vícepráce');
@@ -92,13 +90,13 @@ const ExtraWorkForm: React.FC = () => {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Nová vícepráce</h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Nová vícepráce</h1>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           Vytvořte novou vícepráci a přidejte fotografie a materiály
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-white shadow rounded-lg overflow-hidden">
+      <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
         <div className="px-6 py-5 space-y-6">
           {/* Projekt */}
           <div>
@@ -200,7 +198,7 @@ const ExtraWorkForm: React.FC = () => {
                   onChange={handlePhotoChange}
                 />
               </label>
-              <p className="mt-1 text-xs text-gray-500">PNG, JPG, GIF do 10MB</p>
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">PNG, JPG, GIF do 10MB</p>
             </div>
 
             {photoPreviews.length > 0 && (
@@ -240,7 +238,7 @@ const ExtraWorkForm: React.FC = () => {
               onChange={(e) => setFormData({ ...formData, materialText: e.target.value })}
               placeholder="Např. 10 pytlů cementu, 2 m³ písku, 50 cihel..."
             />
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
               Vyplňte přibližný popis použitých materiálů. Přesný výběr materiálů provede stavbyvedoucí.
             </p>
           </div>
@@ -251,7 +249,7 @@ const ExtraWorkForm: React.FC = () => {
           <button
             type="button"
             onClick={() => navigate('/extra-work')}
-            className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+            className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 dark:bg-gray-700"
           >
             Zrušit
           </button>

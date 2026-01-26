@@ -114,7 +114,7 @@ const MaterialsManagement: React.FC = () => {
   };
 
   if (loading) {
-    return <div className="text-center py-8 text-gray-500">Načítám materiály...</div>;
+    return <div className="text-center py-8 text-gray-500 dark:text-gray-400">Načítám materiály...</div>;
   }
 
   return (
@@ -133,7 +133,7 @@ const MaterialsManagement: React.FC = () => {
 
       <div className="bg-white shadow rounded-lg overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+          <thead className="bg-gray-50 dark:bg-gray-700">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Název</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jednotka</th>
@@ -143,14 +143,14 @@ const MaterialsManagement: React.FC = () => {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {materials.map((material) => (
-              <tr key={material.id} className="hover:bg-gray-50">
+              <tr key={material.id} className="hover:bg-gray-50 dark:bg-gray-700">
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                   {material.name}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                   {material.unit || '-'}
                 </td>
-                <td className="px-6 py-4 text-sm text-gray-500">
+                <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
                   {material.description || '-'}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-3">
