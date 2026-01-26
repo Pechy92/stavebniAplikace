@@ -4,11 +4,12 @@ import { useAuth } from '../contexts/AuthContext';
 import { extraWorkService } from '../services';
 import { ExtraWork } from '../types';
 import { useTranslation } from 'react-i18next';
+import { translationService } from '../services/translationService';
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
   const { t } = useTranslation();
-  const [extraWorks, setExtraWorks] = useState<ExtraWork[]>([]);
+  const [translatedExtraWorks, setTranslatedExtraWorks] = useState<ExtraWork[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -18,7 +19,18 @@ const Dashboard: React.FC = () => {
   const loadExtraWorks = async () => {
     try {
       const data = await extraWorkService.getAll();
-      setExtraWorks(data.slice(0, 5));
+      const recentWorks = data.slice(0, 5);
+      
+      // Automaticky přeložit názvy a popisy
+      const translated = await Promise.all(
+        recentWorks.map(async (work: ExtraWork) => ({
+          ...work,
+          name: await translationService.autoTranslateToCzech(work.name),
+          description: await translationService.autoTranslateToCzech(work.description),
+          project_name: await translationService.autoTranslateToCzech(work.project_name)
+        }))
+      );
+      setTranslatedExtraWorks(translated);
     } catch (error) {
       console.error('Chyba při načítání víceprací:', error);
     } finally {
@@ -141,11 +153,11 @@ const Dashboard: React.FC = () => {
         <div className="border-t border-gray-200">
           {loading ? (
             <div className="p-4 text-center">{t('dashboard.loading')}</div>
-          ) : extraWorks.length === 0 ? (
+          ) : translatedExtraWorks.length === 0 ? (
             <div className="p-4 text-center text-gray-500 dark:text-gray-400">{t('dashboard.noExtraWork')}</div>
           ) : (
             <ul className="divide-y divide-gray-200">
-              {extraWorks.map((extraWork) => (
+              {translatedExtraWorks.map((extraWork) => (
                 <li key={extraWork.id}>
                   <Link
                     to={`/extra-work/${extraWork.id}`}

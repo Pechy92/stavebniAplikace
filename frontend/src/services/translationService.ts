@@ -111,6 +111,32 @@ export const translationService = {
   },
 
   /**
+   * Automaticky přeložit text, pokud je v ukrajinštině
+   * @param text Text k překladu
+   * @returns Přeložený text nebo původní text
+   */
+  async autoTranslateToCzech(text: string | undefined | null): Promise<string> {
+    if (!text || text.trim() === '') {
+      return text || '';
+    }
+
+    // Jednoduchá detekce ukrajinštiny podle znaků (rychlejší než API volání)
+    const ukrainianChars = /[іїєґІЇЄҐ]/;
+    const hasCyrillic = /[а-яА-ЯёЁ]/.test(text);
+    
+    if (hasCyrillic || ukrainianChars.test(text)) {
+      try {
+        return await this.translateToCzech(text);
+      } catch (error) {
+        console.error('Auto-translation failed:', error);
+        return text;
+      }
+    }
+    
+    return text;
+  },
+
+  /**
    * Vymazat cache překladů
    */
   clearCache() {

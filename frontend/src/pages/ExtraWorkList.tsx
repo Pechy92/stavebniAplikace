@@ -4,11 +4,12 @@ import { useAuth } from '../contexts/AuthContext';
 import { extraWorkService } from '../services';
 import { ExtraWork } from '../types';
 import { useTranslation } from 'react-i18next';
+import { translationService } from '../services/translationService';
 
 const ExtraWorkList: React.FC = () => {
   const { user } = useAuth();
   const { t } = useTranslation();
-  const [extraWorks, setExtraWorks] = useState<ExtraWork[]>([]);
+  const [translatedExtraWorks, setTranslatedExtraWorks] = useState<ExtraWork[]>([]);
   const [loading, setLoading] = useState(true);
   const canCreate = user?.role === 'worker';
   const [filters, setFilters] = useState({
@@ -42,7 +43,16 @@ const ExtraWorkList: React.FC = () => {
         );
       }
       
-      setExtraWorks(filtered);
+      // Automaticky přeložit názvy a popisy
+      const translated = await Promise.all(
+        filtered.map(async (work: ExtraWork) => ({
+          ...work,
+          name: await translationService.autoTranslateToCzech(work.name),
+          description: await translationService.autoTranslateToCzech(work.description),
+          project_name: await translationService.autoTranslateToCzech(work.project_name)
+        }))
+      );
+      setTranslatedExtraWorks(translated);
     } catch (error) {
       console.error('Chyba při načítání víceprací:', error);
     } finally {
@@ -85,7 +95,7 @@ const ExtraWorkList: React.FC = () => {
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('extraWork.title')}</h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            {t('shifts.total')}: {extraWorks.length}
+            {t('shifts.total')}: {translatedExtraWorks.length}
           </p>
         </div>
         <div className="mt-4 sm:mt-0">
@@ -156,7 +166,7 @@ const ExtraWorkList: React.FC = () => {
 
       {/* Tabulka */}
       <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
-        {extraWorks.length === 0 ? (
+        {translatedExtraWorks.length === 0 ? (
           <div className="text-center py-12">
             <svg
               className="mx-auto h-12 w-12 text-gray-400"
@@ -217,7 +227,7 @@ const ExtraWorkList: React.FC = () => {
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-              {extraWorks.map((extraWork) => (
+              {translatedExtraWorks.map((extraWork) => (
                 <tr key={extraWork.id} className="hover:bg-gray-50 dark:bg-gray-700">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                     {extraWork.custom_id}

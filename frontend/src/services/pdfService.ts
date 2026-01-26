@@ -1,5 +1,6 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { translationService } from './translationService';
 
 interface ExtraWork {
   id: number;
@@ -53,6 +54,22 @@ const loadImageAsBase64 = async (url: string): Promise<{ data: string; width: nu
 };
 
 export const generateExtraWorkPDF = async (extraWork: ExtraWork): Promise<void> => {
+  // Automaticky přeložit všechny hodnoty do češtiny
+  const translatedWork = {
+    ...extraWork,
+    name: await translationService.autoTranslateToCzech(extraWork.name),
+    description: await translationService.autoTranslateToCzech(extraWork.description),
+    project_name: await translationService.autoTranslateToCzech(extraWork.project_name),
+    material_description_text: await translationService.autoTranslateToCzech(extraWork.material_description_text),
+    materials: extraWork.materials ? await Promise.all(
+      extraWork.materials.map(async (m) => ({
+        ...m,
+        name: await translationService.autoTranslateToCzech(m.name),
+        unit: await translationService.autoTranslateToCzech(m.unit)
+      }))
+    ) : []
+  };
+
   const doc = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',
@@ -91,15 +108,15 @@ export const generateExtraWorkPDF = async (extraWork: ExtraWork): Promise<void> 
   doc.setFont('times', 'bold');
   doc.text(removeDiacritics('ID viceprace:'), margin, yPosition);
   doc.setFont('times', 'normal');
-  doc.text(removeDiacritics(extraWork.custom_id || ''), margin + 40, yPosition);
+  doc.text(removeDiacritics(translatedWork.custom_id || ''), margin + 40, yPosition);
   yPosition += 8;
   
-  // Název vícepráce
-  if (extraWork.name) {
+  // Název víceprace
+  if (translatedWork.name) {
     doc.setFont('times', 'bold');
     doc.text(removeDiacritics('Nazev:'), margin, yPosition);
     doc.setFont('times', 'normal');
-    const nameLines = doc.splitTextToSize(removeDiacritics(extraWork.name), contentWidth - 45);
+    const nameLines = doc.splitTextToSize(removeDiacritics(translatedWork.name), contentWidth - 45);
     doc.text(nameLines, margin + 40, yPosition);
     yPosition += nameLines.length * 6 + 2;
   }
@@ -108,19 +125,19 @@ export const generateExtraWorkPDF = async (extraWork: ExtraWork): Promise<void> 
   doc.setFont('times', 'bold');
   doc.text(removeDiacritics('Projekt:'), margin, yPosition);
   doc.setFont('times', 'normal');
-  doc.text(removeDiacritics(extraWork.project_name || ''), margin + 40, yPosition);
+  doc.text(removeDiacritics(translatedWork.project_name || ''), margin + 40, yPosition);
   yPosition += 8;
   
   // Datum
   doc.setFont('times', 'bold');
   doc.text(removeDiacritics('Datum:'), margin, yPosition);
   doc.setFont('times', 'normal');
-  const workDate = extraWork.work_date || extraWork.created_at || new Date().toISOString();
+  const workDate = translatedWork.work_date || translatedWork.created_at || new Date().toISOString();
   doc.text(removeDiacritics(formatDate(workDate)), margin + 40, yPosition);
   yPosition += 8;
   
   // Počet hodin
-  const hours = extraWork.duration_hours || extraWork.durationHours;
+  const hours = translatedWork.duration_hours || translatedWork.durationHours;
   if (hours) {
     doc.setFont('times', 'bold');
     doc.text(removeDiacritics('Pocet hodin:'), margin, yPosition);
@@ -139,14 +156,14 @@ export const generateExtraWorkPDF = async (extraWork: ExtraWork): Promise<void> 
   yPosition += 12;
 
   // Seznam použitých materiálů
-  if (extraWork.materials && extraWork.materials.length > 0) {
+  if (translatedWork.materials && translatedWork.materials.length > 0) {
     doc.setFontSize(14);
     doc.setFont('times', 'bold');
     doc.text(removeDiacritics('SEZNAM POUZITYCH MATERIALU'), margin, yPosition);
     yPosition += 10;
 
     // Materiály v tabulce
-    const materialRows = extraWork.materials.map((m) => [
+    const materialRows = translatedWork.materials.map((m) => [
       removeDiacritics(m.name),
       m.quantity.toString(),
       removeDiacritics(m.unit || ''),
@@ -190,7 +207,7 @@ export const generateExtraWorkPDF = async (extraWork: ExtraWork): Promise<void> 
   }
 
   // Fotodokumentace
-  if (extraWork.photos && extraWork.photos.length > 0) {
+  if (translatedWork.photos && translatedWork.photos.length > 0) {
     doc.setFontSize(14);
     doc.setFont('times', 'bold');
     doc.text(removeDiacritics('FOTODOKUMENTACE'), margin, yPosition);
@@ -200,8 +217,8 @@ export const generateExtraWorkPDF = async (extraWork: ExtraWork): Promise<void> 
     const maxImgWidth = contentWidth;
     const maxImgHeight = (pageHeight - 100) / 3; // Rozdělíme dostupnou výšku na 3 části
 
-    for (let i = 0; i < extraWork.photos.length; i++) {
-      const photo = extraWork.photos[i];
+    for (let i = 0; i < translatedWork.photos.length; i++) {
+      const photo = translatedWork.photos[i];
 
       // Nová stránka po každých 3 fotkách
       if (i > 0 && i % 3 === 0) {
@@ -299,8 +316,8 @@ export const generateExtraWorkPDF = async (extraWork: ExtraWork): Promise<void> 
   }
 
   // Uložit PDF
-  const customId = (extraWork.custom_id || 'ID').replace(/\//g, '-');
-  const dateStr = formatDate(extraWork.created_at || new Date().toISOString()).replace(/\./g, '-');
+  const customId = (translatedWork.custom_id || 'ID').replace(/\//g, '-');
+  const dateStr = formatDate(translatedWork.created_at || new Date().toISOString()).replace(/\./g, '-');
   const fileName = `viceprace_${customId}_${dateStr}.pdf`;
   doc.save(fileName);
 };
