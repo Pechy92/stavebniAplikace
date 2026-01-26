@@ -236,13 +236,15 @@ const ShiftDetail: React.FC = () => {
             <div className="sm:col-span-2">
               <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2 mb-2">
                 Popis
-                {translationService.isUkrainian(shift.description) && (
-                  <button
-                    onClick={() => handleTranslate(shift.description!)}
-                    disabled={translating.description}
-                    className="text-xs text-primary hover:text-primary-dark disabled:opacity-50"
-                  >
-                    {translating.description ? 'Překládám...' : 'Přeložit'}
+                <button
+                  onClick={async () => {
+                    const isUkr = await translationService.isUkrainian(shift.description || '');
+                    if (isUkr) handleTranslate(shift.description || '');
+                  }}
+                  disabled={translating.description}
+                  className="text-xs text-primary hover:text-primary-dark disabled:opacity-50"
+                >
+                  {translating.description ? 'Překládám...' : 'Přeložit'}
                   </button>
                 )}
               </label>

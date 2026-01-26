@@ -25,14 +25,6 @@ const formatDate = (dateString: string): string => {
 const removeDiacritics = (text: string): string => {
   return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 };
-
-const getStatusText = (status: string): string => {
-  const statusMap: Record<string, string> = {
-    pending: 'Čeká na schválení',
-    approved: 'Schváleno',
-    rejected: 'Zamítnuto',
-  };
-  return statusMap[status] || status;
 };
 
 const loadImageAsBase64 = async (url: string): Promise<{ data: string; width: number; height: number } | null> => {
