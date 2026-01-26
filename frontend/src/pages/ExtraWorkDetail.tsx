@@ -57,10 +57,7 @@ const ExtraWorkDetail: React.FC = () => {
   const handleDownloadPDF = async () => {
     if (!extraWork) return;
     try {
-      await generateExtraWorkPDF({
-        ...extraWork,
-        custom_id: extraWork.custom_id || ''
-      });
+      await generateExtraWorkPDF(extraWork);
     } catch (error) {
       console.error('Chyba při generování PDF:', error);
       alert('Generování PDF se nezdařilo');

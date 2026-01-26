@@ -3,17 +3,19 @@ import autoTable from 'jspdf-autotable';
 
 interface ExtraWork {
   id: number;
-  custom_id: string;
+  custom_id?: string;
   name?: string;
-  description: string;
-  project_name: string;
-  created_by_first_name: string;
-  created_by_last_name: string;
-  created_at: string;
-  status: string;
+  description?: string;
+  project_name?: string;
+  created_by_first_name?: string;
+  created_by_last_name?: string;
+  created_at?: string;
+  status?: string;
   work_date?: string;
+  duration_hours?: number;
+  durationHours?: number;
   material_description_text?: string;
-  materials?: Array<{ name: string; quantity: number; unit: string }>;
+  materials?: Array<{ name: string; quantity: number; unit?: string }>;
   photos?: Array<{ file_path: string; file_name?: string }>;
 }
 
@@ -89,7 +91,7 @@ export const generateExtraWorkPDF = async (extraWork: ExtraWork): Promise<void> 
   doc.setFont('times', 'bold');
   doc.text(removeDiacritics('ID viceprace:'), margin, yPosition);
   doc.setFont('times', 'normal');
-  doc.text(removeDiacritics(extraWork.custom_id), margin + 40, yPosition);
+  doc.text(removeDiacritics(extraWork.custom_id || ''), margin + 40, yPosition);
   yPosition += 8;
   
   // Název vícepráce
@@ -106,14 +108,14 @@ export const generateExtraWorkPDF = async (extraWork: ExtraWork): Promise<void> 
   doc.setFont('times', 'bold');
   doc.text(removeDiacritics('Projekt:'), margin, yPosition);
   doc.setFont('times', 'normal');
-  doc.text(removeDiacritics(extraWork.project_name), margin + 40, yPosition);
+  doc.text(removeDiacritics(extraWork.project_name || ''), margin + 40, yPosition);
   yPosition += 8;
   
   // Datum
   doc.setFont('times', 'bold');
   doc.text(removeDiacritics('Datum:'), margin, yPosition);
   doc.setFont('times', 'normal');
-  const workDate = extraWork.work_date || extraWork.created_at;
+  const workDate = extraWork.work_date || extraWork.created_at || new Date().toISOString();
   doc.text(removeDiacritics(formatDate(workDate)), margin + 40, yPosition);
   yPosition += 8;
   
@@ -147,7 +149,7 @@ export const generateExtraWorkPDF = async (extraWork: ExtraWork): Promise<void> 
     const materialRows = extraWork.materials.map((m) => [
       removeDiacritics(m.name),
       m.quantity.toString(),
-      removeDiacritics(m.unit),
+      removeDiacritics(m.unit || ''),
     ]);
 
     autoTable(doc, {
@@ -294,6 +296,8 @@ export const generateExtraWorkPDF = async (extraWork: ExtraWork): Promise<void> 
   }
 
   // Uložit PDF
-  const fileName = `viceprace_${extraWork.custom_id.replace(/\//g, '-')}_${formatDate(extraWork.created_at).replace(/\./g, '-')}.pdf`;
+  const customId = (extraWork.custom_id || 'ID').replace(/\//g, '-');
+  const dateStr = formatDate(extraWork.created_at || new Date().toISOString()).replace(/\./g, '-');
+  const fileName = `viceprace_${customId}_${dateStr}.pdf`;
   doc.save(fileName);
 };
