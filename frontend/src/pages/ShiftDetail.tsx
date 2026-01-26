@@ -237,14 +237,14 @@ const ShiftDetail: React.FC = () => {
               <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2 mb-2">
                 Popis
                 <button
-                  onClick={async () => {
-                    const isUkr = await translationService.isUkrainian(shift.description || '');
-                    if (isUkr) handleTranslate(shift.description || '');
+                  onClick={() => {
+                    console.log('🔘 Translate shift description button clicked');
+                    handleTranslate(shift.description || '');
                   }}
                   disabled={translating.description}
                   className="text-xs text-primary hover:text-primary-dark disabled:opacity-50"
                 >
-                  {translating.description ? 'Překládám...' : 'Přeložit'}
+                  {translating.description ? 'Překládám...' : 'Přeložit do češtiny'}
                 </button>
               </label>
               <p className="mt-1 text-gray-900 dark:text-white">{shift.description}</p>

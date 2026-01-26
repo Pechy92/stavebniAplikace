@@ -209,14 +209,11 @@ const ExtraWorkDetail: React.FC = () => {
                   <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">
                     Název vícepráce
                     <button
-                      onClick={async () => {
-                        const isUkr = await translationService.isUkrainian(extraWork.name || '');
-                        if (isUkr) handleTranslate('name', extraWork.name || '');
-                      }}
+                      onClick={() => handleTranslate('name', extraWork.name || '')}
                       disabled={translating.name}
                       className="text-xs text-primary hover:text-primary-dark disabled:opacity-50"
                     >
-                      {translating.name ? 'Překládám...' : 'Přeložit'}
+                      {translating.name ? 'Překládám...' : 'Přeložit do češtiny'}
                     </button>
                   </dt>
                   <dd className="mt-1 text-sm text-gray-900 dark:text-white">
@@ -233,14 +230,14 @@ const ExtraWorkDetail: React.FC = () => {
                 <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">
                   Popis
                   <button
-                    onClick={async () => {
-                      const isUkr = await translationService.isUkrainian(extraWork.description || '');
-                      if (isUkr) handleTranslate('description', extraWork.description || '');
+                    onClick={() => {
+                      console.log('🔘 Translate button clicked');
+                      handleTranslate('description', extraWork.description || '');
                     }}
                     disabled={translating.description}
                     className="text-xs text-primary hover:text-primary-dark disabled:opacity-50"
                   >
-                    {translating.description ? 'Překládám...' : 'Přeložit'}
+                    {translating.description ? 'Překládám...' : 'Přeložit do češtiny'}
                   </button>
                 </dt>
                 <dd className="mt-1 text-sm text-gray-900 dark:text-white">
@@ -307,14 +304,14 @@ const ExtraWorkDetail: React.FC = () => {
               <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
                 Popis použitých materiálů (od dělníka)
                 <button
-                  onClick={async () => {
-                    const isUkr = await translationService.isUkrainian(extraWork.material_description_text || '');
-                    if (isUkr) handleTranslate('materialDescription', extraWork.material_description_text || '');
+                  onClick={() => {
+                    console.log('🔘 Translate material description button clicked');
+                    handleTranslate('materialDescription', extraWork.material_description_text || '');
                   }}
                   disabled={translating.materialDescription}
                   className="text-xs text-primary hover:text-primary-dark disabled:opacity-50"
                 >
-                  {translating.materialDescription ? 'Překládám...' : 'Přeložit'}
+                  {translating.materialDescription ? 'Překládám...' : 'Přeložit do češtiny'}
                 </button>
               </h3>
               <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
