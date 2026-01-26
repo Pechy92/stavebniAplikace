@@ -4,10 +4,9 @@ import { LoginCredentials, RegisterData, AuthResponse, User } from '../types';
 export const authService = {
   login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
     console.log('🔐 Attempting login with:', credentials.email);
-    console.log('🌐 API Base URL:', import.meta.env.VITE_API_BASE_URL);
     try {
       const { data } = await api.post('/auth/login', credentials);
-      console.log('✅ Login successful:', data);
+      console.log('✅ Login successful');
       return data;
     } catch (error: any) {
       console.error('❌ Login failed:', error);
