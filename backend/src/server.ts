@@ -8,6 +8,7 @@ import materialRoutes from './routes/materialRoutes';
 import userRoutes from './routes/userRoutes';
 import shiftRoutes from './routes/shiftRoutes';
 import notificationRoutes from './routes/notificationRoutes';
+import initRoutes from './routes/initRoutes';
 import { errorHandler } from './middleware/errorHandler';
 import { createTables } from './config/initDatabase';
 
@@ -32,6 +33,7 @@ app.use('/api/materials', materialRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/shifts', shiftRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api', initRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
