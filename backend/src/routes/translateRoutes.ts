@@ -20,7 +20,7 @@ router.post('/translate', async (req: Request, res: Response) => {
       throw new Error('Translation API failed');
     }
     
-    const data = await response.json();
+    const data: any = await response.json();
     
     let translatedText = '';
     if (data && data[0]) {
