@@ -28,7 +28,7 @@ export const getAllShifts = async (req: AuthRequest, res: Response) => {
       FROM shifts s
       JOIN projects p ON s.project_id = p.id
       LEFT JOIN shift_workers sw ON sw.shift_id = s.id
-      LEFT JOIN users u ON sw.user_id = u.id
+      LEFT JOIN users u ON sw.worker_id = u.id
       GROUP BY s.id
       ORDER BY s.start_datetime DESC`
     );
@@ -86,7 +86,7 @@ export const createShift = async (req: AuthRequest, res: Response) => {
 
     for (const uid of user_ids) {
       await pool.query(
-        `INSERT INTO shift_workers (shift_id, user_id) VALUES (?, ?)`,
+        `INSERT INTO shift_workers (shift_id, worker_id) VALUES (?, ?)`,
         [shiftId, uid]
       );
     }
@@ -129,7 +129,7 @@ export const updateShift = async (req: AuthRequest, res: Response) => {
     await pool.query('DELETE FROM shift_workers WHERE shift_id = ?', [shiftId]);
     for (const uid of user_ids) {
       await pool.query(
-        `INSERT INTO shift_workers (shift_id, user_id) VALUES (?, ?)`,
+        `INSERT INTO shift_workers (shift_id, worker_id) VALUES (?, ?)`,
         [shiftId, uid]
       );
     }
@@ -182,7 +182,7 @@ export const getShiftById = async (req: AuthRequest, res: Response) => {
       FROM shifts s
       JOIN projects p ON s.project_id = p.id
       LEFT JOIN shift_workers sw ON sw.shift_id = s.id
-      LEFT JOIN users u ON sw.user_id = u.id
+      LEFT JOIN users u ON sw.worker_id = u.id
       WHERE s.id = ?
       GROUP BY s.id`,
       [shiftId]
