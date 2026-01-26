@@ -9,6 +9,7 @@ import userRoutes from './routes/userRoutes';
 import shiftRoutes from './routes/shiftRoutes';
 import notificationRoutes from './routes/notificationRoutes';
 import initRoutes from './routes/initRoutes';
+import migrateRoutes from './routes/migrateRoutes';
 import { errorHandler } from './middleware/errorHandler';
 import { createTables } from './config/initDatabase';
 
@@ -34,6 +35,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/shifts', shiftRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api', initRoutes);
+app.use('/api', migrateRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
