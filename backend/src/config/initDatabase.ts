@@ -287,6 +287,68 @@ export async function createTables() {
     `);
 
     console.log('✅ Všechny tabulky byly úspěšně vytvořeny');
+    
+    // Seed admin uživatele a testovací data
+    const bcrypt = require('bcryptjs');
+    
+    // Zkontroluj, jestli už existují uživatelé
+    const [users]: any = await connection.query('SELECT COUNT(*) as count FROM users');
+    
+    if (users[0].count === 0) {
+      console.log('Vytvářím testovací data...');
+      
+      // Admin
+      const adminPassword = await bcrypt.hash('admin123', 10);
+      await connection.query(`
+        INSERT INTO users (email, password_hash, first_name, last_name, role)
+        VALUES ('admin@example.com', ?, 'Admin', 'Správce', 'admin')
+      `, [adminPassword]);
+      console.log('✅ Admin vytvořen (admin@example.com / admin123)');
+      
+      // Manager
+      const managerPassword = await bcrypt.hash('manager123', 10);
+      await connection.query(`
+        INSERT INTO users (email, password_hash, first_name, last_name, role)
+        VALUES ('manager@example.com', ?, 'Jan', 'Manažer', 'manager')
+      `, [managerPassword]);
+      console.log('✅ Manager vytvořen (manager@example.com / manager123)');
+      
+      // Foreman (stavbyvedoucí)
+      const foremanPassword = await bcrypt.hash('foreman123', 10);
+      await connection.query(`
+        INSERT INTO users (email, password_hash, first_name, last_name, role)
+        VALUES ('foreman@example.com', ?, 'Petr', 'Stavbyvedoucí', 'foreman')
+      `, [foremanPassword]);
+      console.log('✅ Stavbyvedoucí vytvořen (foreman@example.com / foreman123)');
+      
+      // Workers
+      const workerPassword = await bcrypt.hash('worker123', 10);
+      await connection.query(`
+        INSERT INTO users (email, password_hash, first_name, last_name, role)
+        VALUES 
+          ('worker1@example.com', ?, 'Олексій', 'Коваленко', 'worker'),
+          ('worker2@example.com', ?, 'Андрій', 'Шевченко', 'worker')
+      `, [workerPassword, workerPassword]);
+      console.log('✅ Dělníci vytvořeni (worker1@example.com, worker2@example.com / worker123)');
+      
+      // Testovací projekt
+      await connection.query(`
+        INSERT INTO projects (name, custom_id, address, status)
+        VALUES ('Testovací projekt', 'PROJ-001', 'Praha 1, Testovací 123', 'active')
+      `);
+      console.log('✅ Testovací projekt vytvořen');
+      
+      // Testovací materiály
+      await connection.query(`
+        INSERT INTO materials (name, description, unit_price, unit, category)
+        VALUES 
+          ('Cihly', 'Klasické pálené cihly', 15.50, 'ks', 'Stavební materiál'),
+          ('Cement', 'Portlandský cement 42,5', 185.00, 'pytel', 'Stavební materiál'),
+          ('Písek', 'Stavební písek', 450.00, 'm3', 'Stavební materiál')
+      `);
+      console.log('✅ Testovací materiály vytvořeny');
+    }
+    
   } catch (error) {
     console.error('❌ Chyba při vytváření tabulek:', error);
     throw error;
