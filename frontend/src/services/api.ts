@@ -1,9 +1,20 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
+// Ensure API URL always ends with /api
+let apiUrl = import.meta.env.VITE_API_BASE_URL || 
   (import.meta.env.MODE === 'production' 
-    ? 'https://stavebniaplikace.up.railway.app/api' 
-    : 'http://localhost:3001/api');
+    ? 'https://stavebniaplikace.up.railway.app' 
+    : 'http://localhost:3001');
+
+// Remove trailing slash if present
+apiUrl = apiUrl.replace(/\/$/, '');
+
+// Add /api if not already present
+if (!apiUrl.endsWith('/api')) {
+  apiUrl += '/api';
+}
+
+const API_BASE_URL = apiUrl;
 
 console.log('🌐 API Base URL:', API_BASE_URL);
 
