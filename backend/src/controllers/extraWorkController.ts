@@ -11,6 +11,12 @@ export const createExtraWork = async (req: AuthRequest, res: Response) => {
     const { project_id, name, description, start_datetime, end_datetime, material_description_text } = req.body;
     const workerId = req.user?.id;
 
+    console.log('📝 Creating extra work:', { project_id, name, workerId });
+
+    if (!project_id || !name || !description) {
+      return res.status(400).json({ message: 'Chybí povinná pole' });
+    }
+
     // Získat název projektu pro automatické generování názvu
     const [projects] = await connection.query('SELECT custom_id FROM projects WHERE id = ?', [project_id]);
     const projectCustomId = (projects as any[])[0]?.custom_id || 'VP';
@@ -18,6 +24,8 @@ export const createExtraWork = async (req: AuthRequest, res: Response) => {
     // Generovat custom_id
     const timestamp = Date.now().toString().slice(-6);
     const customId = `${projectCustomId}-VP-${timestamp}`;
+
+    console.log('🔢 Generated customId:', customId);
 
     const [result] = await connection.query(
       `INSERT INTO extra_work 
@@ -28,8 +36,11 @@ export const createExtraWork = async (req: AuthRequest, res: Response) => {
 
     const extraWorkId = (result as any).insertId;
 
+    console.log('✅ Extra work created with ID:', extraWorkId);
+
     // Přidat fotografie pokud existují
     if (req.files && Array.isArray(req.files)) {
+      console.log('📸 Processing', req.files.length, 'photos');
       for (const file of req.files) {
         // Uložit cestu bez počátečního 'uploads/' - bude se přidávat při servování
         const filePath = '/' + file.path.replace(/\\/g, '/');
@@ -39,6 +50,8 @@ export const createExtraWork = async (req: AuthRequest, res: Response) => {
           [extraWorkId, filePath, file.originalname, file.size, file.mimetype, workerId]
         );
       }
+    } else {
+      console.log('📸 No photos to process');
     }
 
     // Materiály z databáze nyní přidává až stavbyvedoucí, dělník píše pouze textový popis
@@ -51,10 +64,12 @@ export const createExtraWork = async (req: AuthRequest, res: Response) => {
     );
 
     await connection.commit();
+    console.log('✅ Transaction committed');
     res.status(201).json({ message: 'Vícepráce vytvořena', id: extraWorkId });
   } catch (error) {
     await connection.rollback();
-    console.error('Chyba při vytváření vícepráce:', error);
+    console.error('❌ Error creating extra work:', error);
+    console.error('Stack:', (error as Error).stack);
     res.status(500).json({ message: 'Chyba při vytváření vícepráce', error: String(error) });
   } finally {
     connection.release();
