@@ -183,12 +183,11 @@ export const addMaterialsToExtraWork = async (req: AuthRequest, res: Response) =
       }
 
       const unitPrice = (materialData as any[])[0]?.unit_price || 0;
-      const unit = (materialData as any[])[0]?.unit || 'ks';
 
       await connection.query(
-        `INSERT INTO extra_work_materials (extra_work_id, material_id, quantity, unit, unit_price_snapshot, added_by)
-         VALUES (?, ?, ?, ?, ?, ?)`,
-        [id, material.materialId, material.quantity, unit, unitPrice, req.user?.id]
+        `INSERT INTO extra_work_materials (extra_work_id, material_id, quantity, unit_price_snapshot, added_by)
+         VALUES (?, ?, ?, ?, ?)`,
+        [id, material.materialId, material.quantity, unitPrice, req.user?.id]
       );
     }
 
