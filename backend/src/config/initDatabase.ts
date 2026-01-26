@@ -1,4 +1,5 @@
 import pool from './database';
+import bcrypt from 'bcrypt';
 
 export async function createTables() {
   const connection = await pool.getConnection();
@@ -289,8 +290,6 @@ export async function createTables() {
     console.log('✅ Všechny tabulky byly úspěšně vytvořeny');
     
     // Seed admin uživatele a testovací data
-    const bcrypt = require('bcryptjs');
-    
     // Zkontroluj, jestli už existují uživatelé
     const [users]: any = await connection.query('SELECT COUNT(*) as count FROM users');
     
