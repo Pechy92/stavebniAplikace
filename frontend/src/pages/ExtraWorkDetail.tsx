@@ -5,6 +5,7 @@ import { extraWorkService } from '../services';
 import { translationService } from '../services/translationService';
 import { generateExtraWorkPDF } from '../services/pdfService';
 import { ExtraWork } from '../types';
+import { API_BASE_URL } from '../config/api';
 
 const ExtraWorkDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -280,10 +281,10 @@ const ExtraWorkDetail: React.FC = () => {
                 {extraWork.photos.map((photo: any, index: number) => (
                   <div key={photo.id || index} className="relative aspect-square group">
                     <img
-                      src={`http://localhost:3001${photo.file_path}`}
+                      src={`${API_BASE_URL}${photo.file_path}`}
                       alt={photo.file_name || `Fotografie ${index + 1}`}
                       className="w-full h-full object-cover rounded-lg cursor-pointer hover:opacity-90 transition"
-                      onClick={() => window.open(`http://localhost:3001${photo.file_path}`, '_blank')}
+                      onClick={() => window.open(`${API_BASE_URL}${photo.file_path}`, '_blank')}
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
                         target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Crect fill="%23f0f0f0" width="100" height="100"/%3E%3Ctext fill="%23999" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3EObrazek nenalezen%3C/text%3E%3C/svg%3E';

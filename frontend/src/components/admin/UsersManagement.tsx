@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { API_URL } from '../../config/api';
 
 interface User {
   id: number;
@@ -33,7 +34,7 @@ const UsersManagement: React.FC = () => {
   const loadUsers = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:3001/api/users', {
+      const response = await axios.get(`${API_URL}/users`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUsers(response.data);
@@ -83,7 +84,7 @@ const UsersManagement: React.FC = () => {
       if (editingUser) {
         // Upravit existujícího uživatele
         await axios.put(
-          `http://localhost:3001/api/users/${editingUser.id}`,
+          `${API_URL}/users/${editingUser.id}`,
           {
             email: formData.email,
             first_name: formData.firstName,
@@ -98,7 +99,7 @@ const UsersManagement: React.FC = () => {
       } else {
         // Vytvořit nového uživatele
         await axios.post(
-          'http://localhost:3001/api/users',
+          `${API_URL}/users`,
           {
             email: formData.email,
             password: formData.password,
@@ -123,7 +124,7 @@ const UsersManagement: React.FC = () => {
     try {
       const token = localStorage.getItem('token');
       await axios.patch(
-        `http://localhost:3001/api/users/${userId}/toggle-active`,
+        `${API_URL}/users/${userId}/toggle-active`,
         { active: !active },
         { headers: { Authorization: `Bearer ${token}` } }
       );

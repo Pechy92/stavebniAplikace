@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { API_URL } from '../../config/api';
 
 interface Project {
   id: number;
@@ -33,7 +34,7 @@ const ProjectsManagement: React.FC = () => {
   const loadProjects = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:3001/api/projects', {
+      const response = await axios.get(`${API_URL}/projects`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setProjects(response.data);
@@ -82,7 +83,7 @@ const ProjectsManagement: React.FC = () => {
       
       if (editingProject) {
         await axios.put(
-          `http://localhost:3001/api/projects/${editingProject.id}`,
+          `${API_URL}/projects/${editingProject.id}`,
           {
             name: formData.name,
             custom_id: formData.customId,
@@ -96,7 +97,7 @@ const ProjectsManagement: React.FC = () => {
         alert('Projekt byl úspěšně upraven');
       } else {
         await axios.post(
-          'http://localhost:3001/api/projects',
+          `${API_URL}/projects`,
           {
             name: formData.name,
             custom_id: formData.customId,

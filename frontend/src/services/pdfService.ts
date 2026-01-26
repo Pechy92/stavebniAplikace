@@ -154,7 +154,7 @@ export const generateExtraWorkPDF = async (extraWork: ExtraWork): Promise<void> 
 
     autoTable(doc, {
       startY: yPosition,
-      head: [[removeDiacritics('Material'), removeDiacritics('Mnozstvi'), removeDiacritics('Jednotka')]],
+      head: [[removeDiacritics('Materiál'), removeDiacritics('Množství'), removeDiacritics('Jednotka')]],
       body: materialRows,
       theme: 'grid',
       headStyles: { 
@@ -216,7 +216,10 @@ export const generateExtraWorkPDF = async (extraWork: ExtraWork): Promise<void> 
       }
 
       try {
-        const imageUrl = `http://localhost:3001${photo.file_path}`;
+        const apiUrl = import.meta.env.MODE === 'production'
+          ? 'https://stavebniaplikacebackend-production.up.railway.app'
+          : 'http://localhost:3001';
+        const imageUrl = `${apiUrl}${photo.file_path}`;
         const imageData = await loadImageAsBase64(imageUrl);
         
         if (imageData) {

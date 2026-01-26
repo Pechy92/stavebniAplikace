@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { API_URL } from '../../config/api';
 
 interface Material {
   id: number;
@@ -26,7 +27,7 @@ const MaterialsManagement: React.FC = () => {
   const loadMaterials = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:3001/api/materials', {
+      const response = await axios.get(`${API_URL}/materials`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setMaterials(response.data);
@@ -69,7 +70,7 @@ const MaterialsManagement: React.FC = () => {
       
       if (editingMaterial) {
         await axios.put(
-          `http://localhost:3001/api/materials/${editingMaterial.id}`,
+          `${API_URL}/materials/${editingMaterial.id}`,
           {
             name: formData.name,
             unit: formData.unit,
@@ -80,7 +81,7 @@ const MaterialsManagement: React.FC = () => {
         alert('Materiál byl úspěšně upraven');
       } else {
         await axios.post(
-          'http://localhost:3001/api/materials',
+          `${API_URL}/materials`,
           {
             name: formData.name,
             unit: formData.unit,
@@ -103,7 +104,7 @@ const MaterialsManagement: React.FC = () => {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:3001/api/materials/${id}`, {
+      await axios.delete(`${API_URL}/materials/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       alert('Materiál byl úspěšně smazán');

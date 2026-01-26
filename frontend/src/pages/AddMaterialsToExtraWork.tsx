@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
+import { API_URL } from '../config/api';
 
 interface Material {
   id: number;
@@ -32,7 +33,7 @@ const AddMaterialsToExtraWork: React.FC = () => {
   const loadMaterials = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:3001/api/materials', {
+      const response = await axios.get(`${API_URL}/materials`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setMaterials(response.data);
@@ -44,7 +45,7 @@ const AddMaterialsToExtraWork: React.FC = () => {
   const loadExtraWork = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`http://localhost:3001/api/extra-work/${id}`, {
+      const response = await axios.get(`${API_URL}/extra-work/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setExtraWork(response.data);
@@ -86,7 +87,7 @@ const AddMaterialsToExtraWork: React.FC = () => {
       const token = localStorage.getItem('token');
 
       await axios.post(
-        `http://localhost:3001/api/extra-work/${id}/materials`,
+        `${API_URL}/extra-work/${id}/materials`,
         { materials: selectedMaterials },
         {
           headers: {

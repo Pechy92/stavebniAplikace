@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
+import { API_URL } from '../config/api';
 
 interface Shift {
   id: number;
@@ -35,7 +36,7 @@ const ShiftsList: React.FC = () => {
   const loadShifts = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:3001/api/shifts', {
+      const response = await axios.get(`${API_URL}/shifts`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setShifts(response.data);

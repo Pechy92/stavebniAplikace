@@ -4,6 +4,7 @@ import api from '../services/api';
 import { useTranslation } from 'react-i18next';
 import ShiftTasks from '../components/ShiftTasks';
 import { translationService } from '../services/translationService';
+import { API_BASE_URL } from '../config/api';
 
 interface Shift {
   id: number;
@@ -342,7 +343,7 @@ const ShiftDetail: React.FC = () => {
               {photos.map((photo) => (
                 <div key={photo.id} className="relative">
                   <img
-                    src={`http://localhost:3001${photo.file_path}`}
+                    src={`${API_BASE_URL}${photo.file_path}`}
                     alt="Shift photo"
                     className="w-full h-24 object-cover rounded-lg"
                   />

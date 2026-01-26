@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
+import { API_URL } from '../config/api';
 
 interface Project {
   id: number;
@@ -61,7 +62,7 @@ const ShiftForm: React.FC = () => {
   const loadShiftData = async (shiftId: number) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`http://localhost:3001/api/shifts/${shiftId}`, {
+      const response = await axios.get(`${API_URL}/shifts/${shiftId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const shift = response.data;
@@ -91,7 +92,7 @@ const ShiftForm: React.FC = () => {
   const loadProjects = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:3001/api/projects', {
+      const response = await axios.get(`${API_URL}/projects`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setProjects(response.data);
@@ -103,7 +104,7 @@ const ShiftForm: React.FC = () => {
   const loadUsers = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:3001/api/users', {
+      const response = await axios.get(`${API_URL}/users`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUsers(response.data);
@@ -147,7 +148,7 @@ const ShiftForm: React.FC = () => {
       let shiftId = id;
       if (isEditMode && id) {
         await axios.put(
-          `http://localhost:3001/api/shifts/${id}`,
+          `${API_URL}/shifts/${id}`,
           payload,
           {
             headers: { Authorization: `Bearer ${token}` }
@@ -156,7 +157,7 @@ const ShiftForm: React.FC = () => {
         alert(t('shifts.shiftUpdated'));
       } else {
         const response = await axios.post(
-          'http://localhost:3001/api/shifts',
+          `${API_URL}/shifts`,
           payload,
           {
             headers: { Authorization: `Bearer ${token}` }
@@ -172,7 +173,7 @@ const ShiftForm: React.FC = () => {
           if (!task.id) { // Přidat jen nové úkoly
             try {
               await axios.post(
-                `http://localhost:3001/api/shifts/${shiftId}/tasks`,
+                `${API_URL}/shifts/${shiftId}/tasks`,
                 {
                   name: task.name,
                   description: task.description,
