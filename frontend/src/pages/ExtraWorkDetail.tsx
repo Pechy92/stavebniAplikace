@@ -218,10 +218,9 @@ const ExtraWorkDetail: React.FC = () => {
                       }}
                       disabled={translating.name}
                       className="text-xs text-primary hover:text-primary-dark disabled:opacity-50"
-                      >
-                        {translating.name ? 'Překládám...' : 'Přeložit'}
-                      </button>
-                    )}
+                    >
+                      {translating.name ? 'Překládám...' : 'Přeložit'}
+                    </button>
                   </dt>
                   <dd className="mt-1 text-sm text-gray-900 dark:text-white">
                     {extraWork.name}

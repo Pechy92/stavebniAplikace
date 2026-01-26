@@ -245,8 +245,7 @@ const ShiftDetail: React.FC = () => {
                   className="text-xs text-primary hover:text-primary-dark disabled:opacity-50"
                 >
                   {translating.description ? 'Překládám...' : 'Přeložit'}
-                  </button>
-                )}
+                </button>
               </label>
               <p className="mt-1 text-gray-900 dark:text-white">{shift.description}</p>
               {translations.description && (

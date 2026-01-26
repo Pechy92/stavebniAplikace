@@ -25,7 +25,6 @@ const formatDate = (dateString: string): string => {
 const removeDiacritics = (text: string): string => {
   return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 };
-};
 
 const loadImageAsBase64 = async (url: string): Promise<{ data: string; width: number; height: number } | null> => {
   return new Promise((resolve) => {
@@ -119,11 +118,12 @@ export const generateExtraWorkPDF = async (extraWork: ExtraWork): Promise<void> 
   yPosition += 8;
   
   // Počet hodin
-  if (extraWork.duration_hours) {
+  const hours = extraWork.duration_hours || extraWork.durationHours;
+  if (hours) {
     doc.setFont('times', 'bold');
     doc.text(removeDiacritics('Pocet hodin:'), margin, yPosition);
     doc.setFont('times', 'normal');
-    doc.text(removeDiacritics(`${extraWork.duration_hours} h`), margin + 40, yPosition);
+    doc.text(removeDiacritics(`${hours} h`), margin + 40, yPosition);
     yPosition += 8;
   }
   
