@@ -35,8 +35,11 @@ export const register = async (req: Request, res: Response) => {
 export const login = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
+    
+    console.log('🔐 Login attempt for:', email);
 
     if (!email || !password) {
+      console.log('❌ Missing credentials');
       return res.status(400).json({ error: 'E-mail a heslo jsou povinné' });
     }
 
@@ -47,15 +50,22 @@ export const login = async (req: Request, res: Response) => {
     );
 
     const user = (users as any[])[0];
+    
+    console.log('👤 User found:', user ? 'Yes' : 'No');
+    console.log('👤 User found:', user ? 'Yes' : 'No');
 
     if (!user) {
+      console.log('❌ User not found');
       return res.status(401).json({ error: 'Neplatné přihlašovací údaje' });
     }
 
     // Ověřit heslo
     const isPasswordValid = await bcrypt.compare(password, user.password_hash);
+    
+    console.log('🔑 Password valid:', isPasswordValid);
 
     if (!isPasswordValid) {
+      console.log('❌ Invalid password');
       return res.status(401).json({ error: 'Neplatné přihlašovací údaje' });
     }
 
@@ -66,6 +76,8 @@ export const login = async (req: Request, res: Response) => {
       { id: user.id, email: user.email, role: user.role },
       jwtSecret
     ) as string;
+    
+    console.log('✅ Login successful for:', user.email);
 
     res.json({
       token,
@@ -78,6 +90,7 @@ export const login = async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
+    console.error('❌ Login error:', error);
     res.status(500).json({ error: 'Chyba při přihlašování' });
   }
 };
