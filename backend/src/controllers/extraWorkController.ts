@@ -42,8 +42,9 @@ export const createExtraWork = async (req: AuthRequest, res: Response) => {
     if (req.files && Array.isArray(req.files)) {
       console.log('📸 Processing', req.files.length, 'photos');
       for (const file of req.files) {
-        // Uložit cestu bez počátečního 'uploads/' - bude se přidávat při servování
-        const filePath = '/' + file.path.replace(/\\/g, '/');
+        // Uložit cestu relativně k /uploads/
+        const filePath = '/uploads/' + file.filename;
+        console.log('📸 Saving photo path:', filePath);
         await connection.query(
           `INSERT INTO extra_work_photos (extra_work_id, file_path, file_name, file_size, mime_type, uploaded_by)
            VALUES (?, ?, ?, ?, ?, ?)`,

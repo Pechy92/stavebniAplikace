@@ -25,22 +25,25 @@ export const translationService = {
     }
 
     try {
-      // Použití bezplatného Google Translate API přes proxy
-      const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=uk&tl=cs&dt=t&q=${encodeURIComponent(text)}`;
-      
-      const response = await fetch(url);
+      // Použit backend API pro překlad
+      const response = await fetch(`${import.meta.env.MODE === 'production' ? 'https://stavebniaplikacebackend-production.up.railway.app' : 'http://localhost:3001'}/api/translate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text,
+          from: 'uk',
+          to: 'cs'
+        })
+      });
       
       if (!response.ok) {
         throw new Error('Translation failed');
       }
 
       const data = await response.json();
-      
-      // Google Translate API vrací pole polí s překladem
-      let translatedText = '';
-      if (data && data[0]) {
-        translatedText = data[0].map((item: any) => item[0]).join('');
-      }
+      const translatedText = data.translatedText;
 
       // Uložit do cache
       cache[cacheKey] = translatedText;
