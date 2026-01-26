@@ -73,9 +73,13 @@ const Layout: React.FC = () => {
                 )}
               </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <ThemeSwitcher />
-              <LanguageSwitcher />
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              <div className="hidden sm:block">
+                <ThemeSwitcher />
+              </div>
+              <div className="hidden sm:block">
+                <LanguageSwitcher />
+              </div>
               
               <div className="relative">
                 <button
@@ -133,12 +137,12 @@ const Layout: React.FC = () => {
                 )}
               </div>
 
-              <span className="text-sm text-gray-700 dark:text-gray-300">
+              <span className="hidden md:block text-sm text-gray-700 dark:text-gray-300">
                 {user?.firstName} {user?.lastName}
               </span>
               <button
                 onClick={handleLogout}
-                className="text-sm text-primary hover:text-red-700 dark:hover:text-red-600"
+                className="text-sm text-primary hover:text-red-700 dark:hover:text-red-600 whitespace-nowrap"
               >
                 {t('nav.logout')}
               </button>

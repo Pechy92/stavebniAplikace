@@ -8,8 +8,8 @@
     <script>
       // Nastavit dark mode třídu hned při načtení
       const theme = localStorage.getItem('theme');
-      const prefersDark = theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches);
-      if (prefersDark) {
+      // Default je světlý režim, dark mode jen pokud je explicitně nastavený
+      if (theme === 'dark') {
         document.documentElement.classList.add('dark');
       } else {
         document.documentElement.classList.remove('dark');
