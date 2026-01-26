@@ -31,8 +31,8 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",,
-    "start": "serve -s dist -l ${PORT:-4173}"
+    "build": "tsc && vite build",
+    "start": "serve -s dist -l ${PORT:-4173}",
     "preview": "vite preview --host 0.0.0.0 --port ${PORT:-4173}"
   }
 }
