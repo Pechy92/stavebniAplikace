@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Use hardcoded production URL, fallback to localhost for development
 const API_BASE_URL = import.meta.env.MODE === 'production'
-  ? 'https://stavebniaplikace.up.railway.app/api'
+  ? 'https://stavebniaplikacebackend-production.up.railway.app/api'
   : 'http://localhost:3001/api';
 
 console.log('🌐 API Base URL:', API_BASE_URL);
