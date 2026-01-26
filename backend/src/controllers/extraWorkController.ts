@@ -155,16 +155,34 @@ export const addMaterialsToExtraWork = async (req: AuthRequest, res: Response) =
     const { id } = req.params;
     const { materials } = req.body; // [{ materialId, quantity }]
 
+    console.log('📦 Adding materials to extra work:', { id, materials });
+
+    if (!materials || !Array.isArray(materials) || materials.length === 0) {
+      await connection.rollback();
+      return res.status(400).json({ error: 'Materiály nejsou zadány správně' });
+    }
+
     // Smazat staré materiály
     await connection.query('DELETE FROM extra_work_materials WHERE extra_work_id = ?', [id]);
 
     // Přidat nové materiály
     for (const material of materials) {
+      if (!material.materialId || !material.quantity || material.quantity <= 0) {
+        await connection.rollback();
+        return res.status(400).json({ error: 'Neplatné údaje materiálu' });
+      }
+
       const [materialData] = await connection.query(
         'SELECT unit_price, unit FROM materials WHERE id = ?',
         [material.materialId]
       );
-      const unitPrice = (materialData as any[])[0]?.unit_price;
+
+      if (!materialData || (materialData as any[]).length === 0) {
+        await connection.rollback();
+        return res.status(404).json({ error: `Materiál s ID ${material.materialId} nebyl nalezen` });
+      }
+
+      const unitPrice = (materialData as any[])[0]?.unit_price || 0;
       const unit = (materialData as any[])[0]?.unit || 'ks';
 
       await connection.query(
@@ -178,8 +196,8 @@ export const addMaterialsToExtraWork = async (req: AuthRequest, res: Response) =
     res.json({ message: 'Materiály přidány' });
   } catch (error) {
     await connection.rollback();
-    console.error(error);
-    res.status(500).json({ error: 'Chyba při přidávání materiálů' });
+    console.error('❌ Error adding materials:', error);
+    res.status(500).json({ error: 'Chyba při přidávání materiálů', details: (error as Error).message });
   } finally {
     connection.release();
   }

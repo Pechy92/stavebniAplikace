@@ -77,7 +77,7 @@ const AddMaterialsToExtraWork: React.FC = () => {
 
     const invalidMaterial = selectedMaterials.find(m => !m.materialId || m.quantity <= 0);
     if (invalidMaterial) {
-      alert('Vyplňte všechna pole materiálů');
+      alert('Vyplňte všechna pole materiálů a zadejte platné množství');
       return;
     }
 
@@ -85,7 +85,9 @@ const AddMaterialsToExtraWork: React.FC = () => {
       setLoading(true);
       const token = localStorage.getItem('token');
 
-      await axios.post(
+      console.log('Odesílám materiály:', { materials: selectedMaterials });
+
+      const response = await axios.post(
         `${API_URL}/extra-work/${id}/materials`,
         { materials: selectedMaterials },
         {
@@ -96,11 +98,14 @@ const AddMaterialsToExtraWork: React.FC = () => {
         }
       );
 
+      console.log('Odpověď serveru:', response.data);
       alert('Materiály byly úspěšně přidány');
       navigate(`/extra-work/${id}`);
     } catch (error: any) {
       console.error('Chyba při přidávání materiálů:', error);
-      alert(error.response?.data?.error || 'Chyba při přidávání materiálů');
+      console.error('Error response:', error.response?.data);
+      const errorMsg = error.response?.data?.error || error.response?.data?.details || 'Chyba při přidávání materiálů';
+      alert(errorMsg);
     } finally {
       setLoading(false);
     }
