@@ -26,7 +26,14 @@ export const translationService = {
 
     try {
       // Použit backend API pro překlad
-      const response = await fetch(`${import.meta.env.MODE === 'production' ? 'https://stavebniaplikacebackend-production.up.railway.app' : 'http://localhost:3001'}/api/translate`, {
+      const apiUrl = import.meta.env.MODE === 'production' 
+        ? 'https://stavebniaplikacebackend-production.up.railway.app/api/translate'
+        : 'http://localhost:3001/api/translate';
+      
+      console.log('🌐 Translation API URL:', apiUrl);
+      console.log('📝 Translating text:', text);
+      
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -38,11 +45,16 @@ export const translationService = {
         })
       });
       
+      console.log('📡 Response status:', response.status);
+      
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ Translation failed:', errorText);
         throw new Error('Translation failed');
       }
 
       const data = await response.json();
+      console.log('✅ Translation response:', data);
       const translatedText = data.translatedText;
 
       // Uložit do cache
@@ -50,7 +62,7 @@ export const translationService = {
       
       return translatedText;
     } catch (error) {
-      console.error('Translation error:', error);
+      console.error('❌ Translation error:', error);
       return `[Překlad se nezdařil] ${text}`;
     }
   },
