@@ -1,12 +1,12 @@
 import { Router, Request, Response } from 'express';
-import { initDatabase } from '../config/initDatabase';
+import { createTables } from '../config/initDatabase';
 
 const router = Router();
 
 router.get('/init', async (req: Request, res: Response) => {
   try {
     console.log('🔧 Initializing database...');
-    await initDatabase();
+    await createTables();
     res.json({ 
       success: true, 
       message: 'Database initialized successfully with tables and seed data' 
