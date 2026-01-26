@@ -8,7 +8,6 @@ interface Material {
   id: number;
   name: string;
   unit: string;
-  unit_price: number;
 }
 
 interface SelectedMaterial {
@@ -172,7 +171,7 @@ const AddMaterialsToExtraWork: React.FC = () => {
                         <option value="">Vyberte materiál</option>
                         {materials.map(m => (
                           <option key={m.id} value={m.id}>
-                            {m.name} ({m.unit}) - {m.unit_price} Kč/{m.unit}
+                            {m.name} ({m.unit})
                           </option>
                         ))}
                       </select>

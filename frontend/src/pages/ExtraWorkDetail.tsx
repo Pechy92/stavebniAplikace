@@ -331,8 +331,9 @@ const ExtraWorkDetail: React.FC = () => {
           {extraWork.materials && extraWork.materials.length > 0 && (
             <div>
               <h3 className="text-lg font-medium text-gray-900 mb-4">Přesné přiřazení materiálů (stavbyvedoucí)</h3>
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50 dark:bg-gray-700">
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50 dark:bg-gray-700">
                   <tr>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Materiál</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Množství</th>
@@ -349,6 +350,7 @@ const ExtraWorkDetail: React.FC = () => {
                   ))}
                 </tbody>
               </table>
+              </div>
             </div>
           )}
 
