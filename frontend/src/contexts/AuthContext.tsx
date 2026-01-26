@@ -37,9 +37,25 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const login = async (credentials: LoginCredentials) => {
-    const { token, user: userData } = await authService.login(credentials);
-    localStorage.setItem('token', token);
-    setUser(userData);
+    console.log('🔑 AuthContext: Starting login...');
+    const response = await authService.login(credentials);
+    console.log('🔑 AuthContext: Got response:', response);
+    
+    if (!response.token) {
+      console.error('❌ No token in response!');
+      throw new Error('No token received');
+    }
+    
+    if (!response.user) {
+      console.error('❌ No user in response!');
+      throw new Error('No user data received');
+    }
+    
+    localStorage.setItem('token', response.token);
+    console.log('🔑 AuthContext: Token saved to localStorage');
+    
+    setUser(response.user);
+    console.log('🔑 AuthContext: User set:', response.user);
   };
 
   const logout = () => {
