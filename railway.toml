@@ -1,0 +1,5 @@
+[build]
+builder = "NIXPACKS"
+
+[deploy]
+startCommand = "echo 'Use separate services for backend and frontend'"
