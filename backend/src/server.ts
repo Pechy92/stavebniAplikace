@@ -11,6 +11,7 @@ import notificationRoutes from './routes/notificationRoutes';
 import initRoutes from './routes/initRoutes';
 import migrateRoutes from './routes/migrateRoutes';
 import translateRoutes from './routes/translateRoutes';
+import adminRoutes from './routes/adminRoutes';
 import { errorHandler } from './middleware/errorHandler';
 import { createTables } from './config/initDatabase';
 
@@ -38,6 +39,7 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api', initRoutes);
 app.use('/api', migrateRoutes);
 app.use('/api', translateRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
