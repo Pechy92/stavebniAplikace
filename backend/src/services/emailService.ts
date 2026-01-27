@@ -1,15 +1,7 @@
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 import pool from '../config/database';
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: parseInt(process.env.SMTP_PORT || '587'),
-  secure: false,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASSWORD
-  }
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 interface EmailOptions {
   to: string;
@@ -22,12 +14,30 @@ interface EmailOptions {
 
 export async function sendEmail(options: EmailOptions) {
   try {
-    const info = await transporter.sendMail({
-      from: process.env.EMAIL_FROM,
+    // Pokud není nastavený RESEND_API_KEY, pouze zalogovat
+    if (!process.env.RESEND_API_KEY) {
+      console.log('⚠️ RESEND_API_KEY není nastavený. Email nebyl odeslán.');
+      console.log('📧 Email by byl odeslán na:', options.to);
+      console.log('📝 Předmět:', options.subject);
+      
+      // Zaznamenat do databáze jako neodeslaný
+      await pool.query(
+        `INSERT INTO email_notifications 
+         (recipient_email, subject, body, notification_type, related_entity_type, related_entity_id, sent_successfully, error_message) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [options.to, options.subject, options.html, options.notificationType, options.relatedEntityType, options.relatedEntityId, false, 'RESEND_API_KEY není nastavený']
+      );
+      return null;
+    }
+
+    const info = await resend.emails.send({
+      from: 'Stavební aplikace <onboarding@resend.dev>',
       to: options.to,
       subject: options.subject,
       html: options.html
     });
+
+    console.log('✅ Email odeslán:', options.to);
 
     // Zaznamenat do databáze
     await pool.query(
@@ -39,6 +49,8 @@ export async function sendEmail(options: EmailOptions) {
 
     return info;
   } catch (error: any) {
+    console.error('❌ Chyba při odesílání emailu:', error);
+    
     // Zaznamenat chybu do databáze
     await pool.query(
       `INSERT INTO email_notifications 
