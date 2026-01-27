@@ -1,6 +1,7 @@
 import { Router, Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import pool from '../config/database';
+import { sendEmail } from '../services/emailService';
 
 const router = Router();
 
@@ -21,6 +22,37 @@ router.post('/update-test-emails', async (req: AuthRequest, res: Response) => {
   } catch (error) {
     console.error('Chyba při aktualizaci emailů:', error);
     res.status(500).json({ error: 'Chyba při aktualizaci emailů' });
+  }
+});
+
+// TEST ENDPOINT - pro testování emailového systému
+router.post('/test-email', async (req: AuthRequest, res: Response) => {
+  try {
+    const { to } = req.body;
+    const testEmail = to || 'pecholtmartin@gmail.com';
+    
+    console.log('📧 Testuji odeslání emailu na:', testEmail);
+    
+    await sendEmail({
+      to: testEmail,
+      subject: 'Test email ze stavební aplikace',
+      html: '<h1>Test úspěšný!</h1><p>Pokud vidíš tento email, emailový systém funguje správně.</p>',
+      notificationType: 'test',
+      relatedEntityType: 'test',
+      relatedEntityId: 0
+    });
+    
+    res.json({ 
+      success: true, 
+      message: `Test email odeslán na ${testEmail}. Zkontroluj schránku (i spam).`,
+      sentTo: testEmail
+    });
+  } catch (error: any) {
+    console.error('❌ Chyba při testu emailu:', error);
+    res.status(500).json({ 
+      error: 'Chyba při odesílání test emailu',
+      details: error.message 
+    });
   }
 });
 
