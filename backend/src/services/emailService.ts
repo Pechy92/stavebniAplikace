@@ -53,6 +53,11 @@ export async function sendEmail(options: EmailOptions) {
       return null;
     }
 
+    console.log('📧 Připravuji email...');
+    console.log('  Od:', process.env.SENDER_EMAIL);
+    console.log('  Komu:', options.to);
+    console.log('  Předmět:', options.subject);
+
     // Odeslat email přes Microsoft Graph API
     const sendMail = {
       message: {
@@ -72,11 +77,14 @@ export async function sendEmail(options: EmailOptions) {
       saveToSentItems: true
     };
 
-    await client
+    console.log('🚀 Odesílám přes Graph API...');
+    
+    const response = await client
       .api(`/users/${process.env.SENDER_EMAIL}/sendMail`)
       .post(sendMail);
 
-    console.log('✅ Email odeslán:', options.to);
+    console.log('✅ Email úspěšně odeslán!');
+    console.log('📨 Response:', JSON.stringify(response, null, 2));
 
     // Zaznamenat do databáze
     await pool.query(
@@ -88,14 +96,18 @@ export async function sendEmail(options: EmailOptions) {
 
     return { success: true };
   } catch (error: any) {
-    console.error('❌ Chyba při odesílání emailu:', error.message);
+    console.error('❌ Chyba při odesílání emailu:');
+    console.error('  Message:', error.message);
+    console.error('  Code:', error.code);
+    console.error('  StatusCode:', error.statusCode);
+    console.error('  Body:', JSON.stringify(error.body || error, null, 2));
     
     // Zaznamenat chybu do databáze
     await pool.query(
       `INSERT INTO email_notifications 
        (recipient_email, subject, body, notification_type, related_entity_type, related_entity_id, sent_successfully, error_message) 
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [options.to, options.subject, options.html, options.notificationType, options.relatedEntityType, options.relatedEntityId, false, error.message]
+      [options.to, options.subject, options.html, options.notificationType, options.relatedEntityType, options.relatedEntityId, false, `${error.code}: ${error.message}`]
     );
     
     // Nepropagovat chybu - notifikace není kritická
