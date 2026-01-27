@@ -41,9 +41,8 @@ Když dojde ke změně statusu vícepráce nebo přiřazení směny, aplikace po
 ```
 3. Klikni **Done** - Power Automate vygeneruje schéma
 
-### Krok 3: Přidej akce pro notifikace
+### Krok 3: Přidej akci pro poslání emailu
 
-#### Varianta A: Poslat Email
 1. Klikni **+ New step**
 2. Vyhledej **Office 365 Outlook** → **Send an email (V2)**
 3. Nastav:
@@ -51,28 +50,9 @@ Když dojde ke změně statusu vícepráce nebo přiřazení směny, aplikace po
    - **Subject**: vložit dynamic content `subject`
    - **Body**: vložit dynamic content `htmlBody`
    - **Is HTML**: Zapnout (Yes)
+4. (Volitelně) **From (Send as)**: Můžeš nastavit konkrétní odesílací schránku, pokud máš více účtů
 
-#### Varianta B: Poslat Teams zprávu
-1. Klikni **+ New step**
-2. Vyhledej **Microsoft Teams** → **Post message in a chat or channel**
-3. Nastav:
-   - **Post as**: Flow bot
-   - **Post in**: Channel
-   - **Team**: Vyber svůj tým
-   - **Channel**: Vyber kanál
-   - **Message**: 
-     ```
-     📧 Nová notifikace ze stavební aplikace
-     
-     Příjemce: @{triggerBody()?['recipientEmail']}
-     Předmět: @{triggerBody()?['subject']}
-     Typ: @{triggerBody()?['notificationType']}
-     
-     Čas: @{triggerBody()?['timestamp']}
-     ```
-
-#### Varianta C: Oboje (Email + Teams)
-Přidej obě akce za sebe - nejdříve Email, pak Teams
+> **Poznámka:** Email se pošle z tvého M365 účtu, který máš připojený k Power Automate. Můžeš použít jakoukoliv schránku z tvé M365 organizace.
 
 ### Krok 4: Ulož a získej webhook URL
 1. Klikni **Save** v pravém horním rohu
@@ -96,8 +76,9 @@ Po nastavení zkus odeslat vícepráci stavbyvedoucímu - měl by přijít email
 
 ## Výhody tohoto řešení
 
-✅ **Žádné limity** - Power Automate má velmi vysoké limity (tisíce requestů/den)
-✅ **Email + Teams** - můžeš posílat na oba kanály najednou
-✅ **Zdarma** - základní Power Automate je součástí Microsoft 365
-✅ **Flexibilní** - můžeš přidat další akce (uložit do SharePointu, poslat SMS, atd.)
-✅ **Spolehlivé** - Microsoft infrastruktura
+✅ **Neomezené emaily** - Microsoft 365 Business Standard nemá praktické limity na odesílání
+✅ **Firemní schránka** - Emaily jdou z tvé firemní schránky, vypadají profesionálně
+✅ **Zdarma** - Power Automate je součástí M365 Business Standard
+✅ **Spolehlivé** - Microsoft infrastruktura s 99.9% SLA
+✅ **Flexibilní** - Později můžeš přidat Teams, SharePoint, nebo jiné akce
+✅ **Jednoduché** - Nastavení zabere pár minut
