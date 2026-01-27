@@ -1,5 +1,29 @@
-import axios from 'axios';
+import { Client } from '@microsoft/microsoft-graph-client';
+import { ClientSecretCredential } from '@azure/identity';
+import 'isomorphic-fetch';
 import pool from '../config/database';
+
+// Inicializace Graph API klienta
+function getGraphClient() {
+  if (!process.env.AZURE_TENANT_ID || !process.env.AZURE_CLIENT_ID || !process.env.AZURE_CLIENT_SECRET) {
+    return null;
+  }
+
+  const credential = new ClientSecretCredential(
+    process.env.AZURE_TENANT_ID,
+    process.env.AZURE_CLIENT_ID,
+    process.env.AZURE_CLIENT_SECRET
+  );
+
+  return Client.initWithMiddleware({
+    authProvider: {
+      getAccessToken: async () => {
+        const token = await credential.getToken('https://graph.microsoft.com/.default');
+        return token?.token || '';
+      }
+    }
+  });
+}
 
 interface EmailOptions {
   to: string;
@@ -12,9 +36,10 @@ interface EmailOptions {
 
 export async function sendEmail(options: EmailOptions) {
   try {
-    // Pokud není nastavený POWER_AUTOMATE_WEBHOOK, pouze zalogovat
-    if (!process.env.POWER_AUTOMATE_WEBHOOK) {
-      console.log('⚠️ POWER_AUTOMATE_WEBHOOK není nastavený. Notifikace nebyla odeslána.');
+    const client = getGraphClient();
+    
+    if (!client) {
+      console.log('⚠️ Microsoft Graph není nakonfigurován. Email nebyl odeslán.');
       console.log('📧 Email by byl odeslán na:', options.to);
       console.log('📝 Předmět:', options.subject);
       
@@ -23,28 +48,35 @@ export async function sendEmail(options: EmailOptions) {
         `INSERT INTO email_notifications 
          (recipient_email, subject, body, notification_type, related_entity_type, related_entity_id, sent_successfully, error_message) 
          VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-        [options.to, options.subject, options.html, options.notificationType, options.relatedEntityType, options.relatedEntityId, false, 'POWER_AUTOMATE_WEBHOOK není nastavený']
+        [options.to, options.subject, options.html, options.notificationType, options.relatedEntityType, options.relatedEntityId, false, 'Microsoft Graph není nakonfigurován']
       );
       return null;
     }
 
-    // Odeslat data na Power Automate webhook
-    const response = await axios.post(process.env.POWER_AUTOMATE_WEBHOOK, {
-      recipientEmail: options.to,
-      subject: options.subject,
-      htmlBody: options.html,
-      notificationType: options.notificationType,
-      relatedEntityType: options.relatedEntityType,
-      relatedEntityId: options.relatedEntityId,
-      timestamp: new Date().toISOString()
-    }, {
-      headers: {
-        'Content-Type': 'application/json'
+    // Odeslat email přes Microsoft Graph API
+    const sendMail = {
+      message: {
+        subject: options.subject,
+        body: {
+          contentType: 'HTML',
+          content: options.html
+        },
+        toRecipients: [
+          {
+            emailAddress: {
+              address: options.to
+            }
+          }
+        ]
       },
-      timeout: 10000 // 10 sekund timeout
-    });
+      saveToSentItems: true
+    };
 
-    console.log('✅ Notifikace odeslána na Power Automate:', options.to);
+    await client
+      .api(`/users/${process.env.SENDER_EMAIL}/sendMail`)
+      .post(sendMail);
+
+    console.log('✅ Email odeslán:', options.to);
 
     // Zaznamenat do databáze
     await pool.query(
@@ -54,9 +86,9 @@ export async function sendEmail(options: EmailOptions) {
       [options.to, options.subject, options.html, options.notificationType, options.relatedEntityType, options.relatedEntityId, true]
     );
 
-    return response.data;
+    return { success: true };
   } catch (error: any) {
-    console.error('❌ Chyba při odesílání notifikace na Power Automate:', error.message);
+    console.error('❌ Chyba při odesílání emailu:', error.message);
     
     // Zaznamenat chybu do databáze
     await pool.query(
@@ -66,8 +98,8 @@ export async function sendEmail(options: EmailOptions) {
       [options.to, options.subject, options.html, options.notificationType, options.relatedEntityType, options.relatedEntityId, false, error.message]
     );
     
-    // Nepropagovat chybu - notifikace není kritická pro fungování aplikace
-    console.warn('⚠️ Notifikace selhala, ale operace pokračuje');
+    // Nepropagovat chybu - notifikace není kritická
+    console.warn('⚠️ Email selhal, ale operace pokračuje');
   }
 }
 
