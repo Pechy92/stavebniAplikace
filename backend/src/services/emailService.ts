@@ -1,29 +1,16 @@
-import { Client } from '@microsoft/microsoft-graph-client';
-import { ClientSecretCredential } from '@azure/identity';
-import 'isomorphic-fetch';
+import nodemailer from 'nodemailer';
 import pool from '../config/database';
 
-// Inicializace Graph API klienta
-function getGraphClient() {
-  if (!process.env.AZURE_TENANT_ID || !process.env.AZURE_CLIENT_ID || !process.env.AZURE_CLIENT_SECRET) {
-    return null;
+// SMTP transporter pro SendGrid
+const transporter = nodemailer.createTransport({
+  host: 'smtp.sendgrid.net',
+  port: 587,
+  secure: false,
+  auth: {
+    user: 'apikey',
+    pass: process.env.SENDGRID_API_KEY
   }
-
-  const credential = new ClientSecretCredential(
-    process.env.AZURE_TENANT_ID,
-    process.env.AZURE_CLIENT_ID,
-    process.env.AZURE_CLIENT_SECRET
-  );
-
-  return Client.initWithMiddleware({
-    authProvider: {
-      getAccessToken: async () => {
-        const token = await credential.getToken('https://graph.microsoft.com/.default');
-        return token?.token || '';
-      }
-    }
-  });
-}
+});
 
 interface EmailOptions {
   to: string;
@@ -36,19 +23,16 @@ interface EmailOptions {
 
 export async function sendEmail(options: EmailOptions) {
   try {
-    const client = getGraphClient();
-    
-    if (!client) {
-      console.log('⚠️ Microsoft Graph není nakonfigurován. Email nebyl odeslán.');
+    if (!process.env.SENDER_EMAIL || !process.env.SENDGRID_API_KEY) {
+      console.log('⚠️ SENDER_EMAIL nebo SENDGRID_API_KEY není nastavený. Email nebyl odeslán.');
       console.log('📧 Email by byl odeslán na:', options.to);
       console.log('📝 Předmět:', options.subject);
       
-      // Zaznamenat do databáze jako neodeslaný
       await pool.query(
         `INSERT INTO email_notifications 
          (recipient_email, subject, body, notification_type, related_entity_type, related_entity_id, sent_successfully, error_message) 
          VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-        [options.to, options.subject, options.html, options.notificationType, options.relatedEntityType, options.relatedEntityId, false, 'Microsoft Graph není nakonfigurován']
+        [options.to, options.subject, options.html, options.notificationType, options.relatedEntityType, options.relatedEntityId, false, 'SENDER_EMAIL/SENDGRID_API_KEY není nastavený']
       );
       return null;
     }
@@ -57,36 +41,18 @@ export async function sendEmail(options: EmailOptions) {
     console.log('  Od:', process.env.SENDER_EMAIL);
     console.log('  Komu:', options.to);
     console.log('  Předmět:', options.subject);
+    console.log('🚀 Odesílám přes SendGrid...');
 
-    // Odeslat email přes Microsoft Graph API
-    const sendMail = {
-      message: {
-        subject: options.subject,
-        body: {
-          contentType: 'HTML',
-          content: options.html
-        },
-        toRecipients: [
-          {
-            emailAddress: {
-              address: options.to
-            }
-          }
-        ]
-      },
-      saveToSentItems: true
-    };
-
-    console.log('🚀 Odesílám přes Graph API...');
-    
-    const response = await client
-      .api(`/users/${process.env.SENDER_EMAIL}/sendMail`)
-      .post(sendMail);
+    const info = await transporter.sendMail({
+      from: `Stavební aplikace <${process.env.SENDER_EMAIL}>`,
+      to: options.to,
+      subject: options.subject,
+      html: options.html
+    });
 
     console.log('✅ Email úspěšně odeslán!');
-    console.log('📨 Response:', JSON.stringify(response, null, 2));
+    console.log('📨 Message ID:', info.messageId);
 
-    // Zaznamenat do databáze
     await pool.query(
       `INSERT INTO email_notifications 
        (recipient_email, subject, body, notification_type, related_entity_type, related_entity_id, sent_successfully) 
@@ -94,15 +60,12 @@ export async function sendEmail(options: EmailOptions) {
       [options.to, options.subject, options.html, options.notificationType, options.relatedEntityType, options.relatedEntityId, true]
     );
 
-    return { success: true };
+    return { success: true, messageId: info.messageId };
   } catch (error: any) {
     console.error('❌ Chyba při odesílání emailu:');
     console.error('  Message:', error.message);
     console.error('  Code:', error.code);
-    console.error('  StatusCode:', error.statusCode);
-    console.error('  Body:', JSON.stringify(error.body || error, null, 2));
     
-    // Zaznamenat chybu do databáze
     await pool.query(
       `INSERT INTO email_notifications 
        (recipient_email, subject, body, notification_type, related_entity_type, related_entity_id, sent_successfully, error_message) 
@@ -110,7 +73,6 @@ export async function sendEmail(options: EmailOptions) {
       [options.to, options.subject, options.html, options.notificationType, options.relatedEntityType, options.relatedEntityId, false, `${error.code}: ${error.message}`]
     );
     
-    // Nepropagovat chybu - notifikace není kritická
     console.warn('⚠️ Email selhal, ale operace pokračuje');
   }
 }
