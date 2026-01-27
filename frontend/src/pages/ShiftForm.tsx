@@ -366,14 +366,13 @@ const ShiftForm: React.FC = () => {
               </div>
 
               {showTaskForm && (
-                <form onSubmit={(e) => { e.preventDefault(); handleAddTask(); }} className="bg-gray-50 p-4 rounded-lg mb-4 space-y-4">
+                <div className="bg-gray-50 p-4 rounded-lg mb-4 space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       {t('shifts.taskName')} <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
-                      required
                       className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
                       value={newTask.name}
                       onChange={(e) => setNewTask({ ...newTask, name: e.target.value })}
@@ -427,7 +426,8 @@ const ShiftForm: React.FC = () => {
 
                   <div className="flex gap-2">
                     <button
-                      type="submit"
+                      type="button"
+                      onClick={handleAddTask}
                       className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark"
                     >
                       {t('common.add')}
@@ -440,7 +440,7 @@ const ShiftForm: React.FC = () => {
                       {t('common.cancel')}
                     </button>
                   </div>
-                </form>
+                </div>
               )}
 
               {tasks.length > 0 && (

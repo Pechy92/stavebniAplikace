@@ -359,15 +359,30 @@ const ExtraWorkDetail: React.FC = () => {
             <div>
               <h3 className="text-lg font-medium text-gray-900 mb-4">Komentáře a historie</h3>
               <div className="space-y-3">
-                {extraWork.comments.map((comment: any, index: number) => (
-                  <div key={index} className="bg-gray-50 rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-gray-900 dark:text-white">{comment.author_name}</span>
-                      <span className="text-xs text-gray-500 dark:text-gray-400">{formatDate(comment.created_at)}</span>
+                {extraWork.comments.map((comment: any, index: number) => {
+                  // Mapování akcí na české texty
+                  const actionTranslations: Record<string, string> = {
+                    'created': 'Vytvořeno',
+                    'submitted_to_foreman': 'Odesláno stavbyvedoucímu',
+                    'submitted_to_manager': 'Odesláno manažerovi',
+                    'approved': 'Schváleno',
+                    'returned_to_worker': 'Vráceno dělníkovi',
+                    'returned_to_foreman': 'Vráceno stavbyvedoucímu',
+                    'rejected': 'Zamítnuto'
+                  };
+                  
+                  const translatedComment = actionTranslations[comment.comment] || comment.comment;
+                  
+                  return (
+                    <div key={index} className="bg-gray-50 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium text-gray-900 dark:text-white">{comment.author_name}</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">{formatDate(comment.created_at)}</span>
+                      </div>
+                      <p className="text-sm text-gray-700 dark:text-gray-300">{translatedComment}</p>
                     </div>
-                    <p className="text-sm text-gray-700 dark:text-gray-300">{comment.comment}</p>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
