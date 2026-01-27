@@ -360,20 +360,22 @@ const ExtraWorkDetail: React.FC = () => {
               <h3 className="text-lg font-medium text-gray-900 mb-4">Komentáře a historie</h3>
               <div className="space-y-3">
                 {extraWork.comments.map((comment: any, index: number) => {
-                  // Mapování akcí na české texty
-                  const actionTranslations: Record<string, string> = {
-                    'created': 'Vytvořeno',
-                    'submitted': 'Odesláno',
+                  // Mapování statusů na české texty - používáme status_to pro detailní informaci
+                  const statusTranslations: Record<string, string> = {
+                    'draft': 'Vytvořeno jako koncept',
                     'submitted_to_foreman': 'Odesláno stavbyvedoucímu',
                     'submitted_to_manager': 'Odesláno manažerovi',
-                    'approved': 'Schváleno',
-                    'returned': 'Vráceno',
+                    'approved': 'Schváleno manažerem',
                     'returned_to_worker': 'Vráceno dělníkovi',
                     'returned_to_foreman': 'Vráceno stavbyvedoucímu',
                     'rejected': 'Zamítnuto'
                   };
                   
-                  const translatedComment = actionTranslations[comment.comment] || comment.comment;
+                  // Pokud existuje note (důvod vrácení), zobrazit ho
+                  // Jinak použít status_to pro detailní popis akce
+                  const translatedComment = comment.status_to 
+                    ? (statusTranslations[comment.status_to] || comment.status_to)
+                    : comment.comment;
                   
                   return (
                     <div key={index} className="bg-gray-50 rounded-lg p-4">

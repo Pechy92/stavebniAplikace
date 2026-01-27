@@ -365,7 +365,10 @@ export const getExtraWorkById = async (req: AuthRequest, res: Response) => {
     const comments = (history as any[]).map((item) => ({
       author_name: item.first_name && item.last_name ? `${item.first_name} ${item.last_name}` : 'Systém',
       created_at: item.action_datetime,
-      comment: item.note || item.action
+      comment: item.note || item.action,
+      action: item.action,
+      status_to: item.status_to,
+      status_from: item.status_from
     }));
 
     res.json({ ...extraWork, photos, materials, history, comments });
