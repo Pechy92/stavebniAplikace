@@ -363,9 +363,11 @@ const ExtraWorkDetail: React.FC = () => {
                   // Mapování akcí na české texty
                   const actionTranslations: Record<string, string> = {
                     'created': 'Vytvořeno',
+                    'submitted': 'Odesláno',
                     'submitted_to_foreman': 'Odesláno stavbyvedoucímu',
                     'submitted_to_manager': 'Odesláno manažerovi',
                     'approved': 'Schváleno',
+                    'returned': 'Vráceno',
                     'returned_to_worker': 'Vráceno dělníkovi',
                     'returned_to_foreman': 'Vráceno stavbyvedoucímu',
                     'rejected': 'Zamítnuto'
