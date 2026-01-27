@@ -1,7 +1,5 @@
-import { Resend } from 'resend';
+import axios from 'axios';
 import pool from '../config/database';
-
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 interface EmailOptions {
   to: string;
@@ -14,9 +12,9 @@ interface EmailOptions {
 
 export async function sendEmail(options: EmailOptions) {
   try {
-    // Pokud není nastavený RESEND_API_KEY, pouze zalogovat
-    if (!process.env.RESEND_API_KEY) {
-      console.log('⚠️ RESEND_API_KEY není nastavený. Email nebyl odeslán.');
+    // Pokud není nastavený POWER_AUTOMATE_WEBHOOK, pouze zalogovat
+    if (!process.env.POWER_AUTOMATE_WEBHOOK) {
+      console.log('⚠️ POWER_AUTOMATE_WEBHOOK není nastavený. Notifikace nebyla odeslána.');
       console.log('📧 Email by byl odeslán na:', options.to);
       console.log('📝 Předmět:', options.subject);
       
@@ -25,19 +23,28 @@ export async function sendEmail(options: EmailOptions) {
         `INSERT INTO email_notifications 
          (recipient_email, subject, body, notification_type, related_entity_type, related_entity_id, sent_successfully, error_message) 
          VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-        [options.to, options.subject, options.html, options.notificationType, options.relatedEntityType, options.relatedEntityId, false, 'RESEND_API_KEY není nastavený']
+        [options.to, options.subject, options.html, options.notificationType, options.relatedEntityType, options.relatedEntityId, false, 'POWER_AUTOMATE_WEBHOOK není nastavený']
       );
       return null;
     }
 
-    const info = await resend.emails.send({
-      from: 'Stavební aplikace <onboarding@resend.dev>',
-      to: options.to,
+    // Odeslat data na Power Automate webhook
+    const response = await axios.post(process.env.POWER_AUTOMATE_WEBHOOK, {
+      recipientEmail: options.to,
       subject: options.subject,
-      html: options.html
+      htmlBody: options.html,
+      notificationType: options.notificationType,
+      relatedEntityType: options.relatedEntityType,
+      relatedEntityId: options.relatedEntityId,
+      timestamp: new Date().toISOString()
+    }, {
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      timeout: 10000 // 10 sekund timeout
     });
 
-    console.log('✅ Email odeslán:', options.to);
+    console.log('✅ Notifikace odeslána na Power Automate:', options.to);
 
     // Zaznamenat do databáze
     await pool.query(
@@ -47,9 +54,9 @@ export async function sendEmail(options: EmailOptions) {
       [options.to, options.subject, options.html, options.notificationType, options.relatedEntityType, options.relatedEntityId, true]
     );
 
-    return info;
+    return response.data;
   } catch (error: any) {
-    console.error('❌ Chyba při odesílání emailu:', error);
+    console.error('❌ Chyba při odesílání notifikace na Power Automate:', error.message);
     
     // Zaznamenat chybu do databáze
     await pool.query(
@@ -59,7 +66,8 @@ export async function sendEmail(options: EmailOptions) {
       [options.to, options.subject, options.html, options.notificationType, options.relatedEntityType, options.relatedEntityId, false, error.message]
     );
     
-    throw error;
+    // Nepropagovat chybu - notifikace není kritická pro fungování aplikace
+    console.warn('⚠️ Notifikace selhala, ale operace pokračuje');
   }
 }
 
