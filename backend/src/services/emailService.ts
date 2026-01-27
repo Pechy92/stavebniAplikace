@@ -1,16 +1,10 @@
-import nodemailer from 'nodemailer';
+import sgMail from '@sendgrid/mail';
 import pool from '../config/database';
 
-// SMTP transporter pro SendGrid
-const transporter = nodemailer.createTransport({
-  host: 'smtp.sendgrid.net',
-  port: 587,
-  secure: false,
-  auth: {
-    user: 'apikey',
-    pass: process.env.SENDGRID_API_KEY
-  }
-});
+// Nastavit SendGrid API klíč
+if (process.env.SENDGRID_API_KEY) {
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+}
 
 interface EmailOptions {
   to: string;
@@ -41,17 +35,19 @@ export async function sendEmail(options: EmailOptions) {
     console.log('  Od:', process.env.SENDER_EMAIL);
     console.log('  Komu:', options.to);
     console.log('  Předmět:', options.subject);
-    console.log('🚀 Odesílám přes SendGrid...');
+    console.log('🚀 Odesílám přes SendGrid Web API...');
 
-    const info = await transporter.sendMail({
-      from: `Stavební aplikace <${process.env.SENDER_EMAIL}>`,
+    const msg = {
       to: options.to,
+      from: process.env.SENDER_EMAIL!,
       subject: options.subject,
       html: options.html
-    });
+    };
+
+    const response = await sgMail.send(msg);
 
     console.log('✅ Email úspěšně odeslán!');
-    console.log('📨 Message ID:', info.messageId);
+    console.log('📨 Response status:', response[0].statusCode);
 
     await pool.query(
       `INSERT INTO email_notifications 
@@ -60,7 +56,7 @@ export async function sendEmail(options: EmailOptions) {
       [options.to, options.subject, options.html, options.notificationType, options.relatedEntityType, options.relatedEntityId, true]
     );
 
-    return { success: true, messageId: info.messageId };
+    return { success: true, statusCode: response[0].statusCode };
   } catch (error: any) {
     console.error('❌ Chyba při odesílání emailu:');
     console.error('  Message:', error.message);

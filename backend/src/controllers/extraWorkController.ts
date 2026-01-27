@@ -84,12 +84,17 @@ export const submitExtraWorkToForeman = async (req: AuthRequest, res: Response) 
 
     const { id } = req.params;
 
+    console.log('📤 submitExtraWorkToForeman called for ID:', id);
+    console.log('👤 User:', req.user?.id, req.user?.email);
+
     // Najít stavbyvedoucího pro tuto stavbu
     const [extraWorks] = await connection.query(
       'SELECT ew.*, p.name as project_name FROM extra_work ew JOIN projects p ON ew.project_id = p.id WHERE ew.id = ?',
       [id]
     );
     const extraWork = (extraWorks as any[])[0];
+
+    console.log('📋 Extra work data:', extraWork);
 
     // Povolit znovuodeslání jen z draft / returned_to_worker
     if (!['draft', 'returned_to_worker'].includes(extraWork.status)) {
@@ -104,6 +109,9 @@ export const submitExtraWorkToForeman = async (req: AuthRequest, res: Response) 
     );
 
     const foreman = (foremen as any[])[0];
+
+    console.log('🔍 Hledám stavbyvedoucího pro projekt:', extraWork.project_id);
+    console.log('👷 Nalezený stavbyvedoucí:', foreman);
 
     // Aktualizovat status
     await connection.query(
@@ -121,9 +129,10 @@ export const submitExtraWorkToForeman = async (req: AuthRequest, res: Response) 
     await connection.commit();
 
     // Odeslat e-mail stavbyvedoucímu (neblokující)
-    if (foreman) {
+    if (foreman && foreman.email) {
+      console.log('📧 Pokouším se odeslat email na:', foreman.email);
       try {
-        await sendEmail({
+        const emailResult = await sendEmail({
           to: foreman.email,
           subject: `Nová vícepráce ke kontrole: ${extraWork.name || extraWork.custom_id}`,
           html: getExtraWorkStatusChangeTemplate(extraWork.name || extraWork.custom_id, 'submitted_to_foreman', `${process.env.FRONTEND_URL}/extra-work/${id}`),
@@ -131,10 +140,14 @@ export const submitExtraWorkToForeman = async (req: AuthRequest, res: Response) 
           relatedEntityType: 'extra_work',
           relatedEntityId: parseInt(id)
         });
+        console.log('✅ Email odeslán, výsledek:', emailResult);
       } catch (emailError) {
-        console.error('Email se nepodařilo odeslat:', emailError);
+        console.error('❌ Email se nepodařilo odeslat:', emailError);
+        console.error('Stack:', (emailError as Error).stack);
         // Pokračovat i když email selže
       }
+    } else {
+      console.log('⚠️ Stavbyvedoucí nemá email nebo nebyl nalezen, email se neposílá');
     }
 
     res.json({ message: 'Vícepráce odeslána ke kontrole' });
