@@ -117,7 +117,15 @@ export const createShift = async (req: AuthRequest, res: Response) => {
       );
 
       const actionUrl = `${process.env.FRONTEND_URL}/shifts/${shiftId}`;
-      const formattedDate = `${date} ${start_time}`;
+      
+      // Formátovat datum do českého formátu (DD.MM.YYYY HH:mm)
+      const [year, month, day] = date.split('-');
+      const formattedDate = `${day}.${month}.${year} ${start_time}`;
+
+      console.log(`📝 Úkolů k odeslání v emailu: ${tasks.length}`);
+      if (tasks.length > 0) {
+        console.log('📋 Úkoly:', tasks);
+      }
 
       // Odeslat email každému pracovníkovi a autorovi
       for (const worker of workers as any[]) {

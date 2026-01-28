@@ -111,14 +111,16 @@ export function getExtraWorkStatusChangeTemplate(extraWorkName: string, status: 
 }
 
 export function getShiftAssignmentTemplate(shiftName: string, projectName: string, startDate: string, actionUrl: string, tasks: any[] = [], workerInstructions: string = '') {
+  console.log(`📧 Email šablona: úkolů = ${tasks?.length || 0}, instrukcí = ${workerInstructions ? 'ano' : 'ne'}`);
+  
   const tasksHtml = tasks && tasks.length > 0 
     ? `
-      <h3>Úkoly na směně:</h3>
-      <ul style="background: white; padding: 15px; border-radius: 5px;">
+      <h3 style="color: #DC2626; margin-top: 20px;">Úkoly na směně:</h3>
+      <ul style="list-style: none; padding: 0;">
         ${tasks.map(task => `
-          <li style="margin: 10px 0;">
-            <strong>${task.title}</strong>
-            ${task.description ? `<br/><span style="color: #666;">${task.description}</span>` : ''}
+          <li style="margin: 10px 0; padding: 12px; background: white; border-left: 4px solid #DC2626; border-radius: 4px;">
+            <strong style="color: #DC2626; font-size: 16px;">${task.title || task.name}</strong>
+            ${task.description ? `<br/><span style="color: #666; margin-top: 5px; display: block;">${task.description}</span>` : ''}
           </li>
         `).join('')}
       </ul>
