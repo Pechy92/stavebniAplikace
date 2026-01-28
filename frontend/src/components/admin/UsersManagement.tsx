@@ -37,7 +37,12 @@ const UsersManagement: React.FC = () => {
       const response = await axios.get(`${API_URL}/users`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setUsers(response.data);
+      // Map is_active to active for frontend
+      const mappedUsers = response.data.map((user: any) => ({
+        ...user,
+        active: user.is_active
+      }));
+      setUsers(mappedUsers);
     } catch (error) {
       console.error('Chyba při načítání uživatelů:', error);
     } finally {
