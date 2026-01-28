@@ -92,6 +92,26 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
   }
 };
 
+export const toggleUserActive = async (req: AuthRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { active, is_active } = req.body;
+    
+    // Accept both 'active' and 'is_active' parameter names
+    const activeStatus = is_active !== undefined ? is_active : active;
+
+    await pool.query(
+      'UPDATE users SET is_active = ?, updated_by = ? WHERE id = ?',
+      [activeStatus, req.user?.id, id]
+    );
+
+    res.json({ message: 'Stav uživatele změněn' });
+  } catch (error) {
+    console.error('Toggle active error:', error);
+    res.status(500).json({ error: 'Chyba při změně stavu uživatele' });
+  }
+};
+
 export const deleteUser = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
