@@ -87,6 +87,15 @@ const ProjectsManagement: React.FC = () => {
           })
         ]);
         
+        console.log('👥 Načtení manažeři:', managersRes.data);
+        console.log('👷 Načtení stavbyvedoucí:', foremenRes.data);
+        
+        const managerIds = managersRes.data.map((m: User) => m.id);
+        const foremanIds = foremenRes.data.map((f: User) => f.id);
+        
+        console.log('🔢 Manager IDs:', managerIds);
+        console.log('🔢 Foreman IDs:', foremanIds);
+        
         setFormData({
           name: project.name,
           customId: project.custom_id,
@@ -94,8 +103,8 @@ const ProjectsManagement: React.FC = () => {
           startDate: project.start_date,
           plannedEndDate: project.planned_end_date,
           status: project.status,
-          managerIds: managersRes.data.map((m: User) => m.id),
-          foremanIds: foremenRes.data.map((f: User) => f.id)
+          managerIds: managerIds,
+          foremanIds: foremanIds
         });
       } catch (error) {
         console.error('Chyba při načítání přiřazení:', error);
@@ -365,27 +374,38 @@ const ProjectsManagement: React.FC = () => {
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Manažeři
                       </label>
+                      {editingProject && (
+                        <p className="text-xs text-gray-500 mb-1">
+                          Debug: Vybrané IDs: {JSON.stringify(formData.managerIds)}
+                        </p>
+                      )}
                       <div className="max-h-40 overflow-y-auto border border-gray-300 rounded-md p-2 space-y-2">
-                        {users.filter(u => u.role === 'manager' || u.role === 'admin').map(user => (
-                          <label key={user.id} className="flex items-center space-x-2 hover:bg-gray-50 p-1 rounded cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={formData.managerIds.includes(user.id)}
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  setFormData({ ...formData, managerIds: [...formData.managerIds, user.id] });
-                                } else {
-                                  setFormData({ ...formData, managerIds: formData.managerIds.filter(id => id !== user.id) });
-                                }
-                              }}
-                              className="rounded border-gray-300 text-primary focus:ring-primary"
-                            />
-                            <span className="text-sm text-gray-900">
-                              {user.first_name} {user.last_name} 
-                              <span className="text-gray-500 text-xs ml-1">({user.role === 'admin' ? 'Admin' : 'Manažer'})</span>
-                            </span>
-                          </label>
-                        ))}
+                        {users.filter(u => u.role === 'manager' || u.role === 'admin').map(user => {
+                          const isChecked = formData.managerIds.includes(user.id);
+                          return (
+                            <label key={user.id} className={`flex items-center space-x-2 p-1 rounded cursor-pointer ${isChecked ? 'bg-blue-50' : 'hover:bg-gray-50'}`}>
+                              <input
+                                type="checkbox"
+                                checked={isChecked}
+                                onChange={(e) => {
+                                  console.log(`Manager ${user.id} (${user.first_name}):`, e.target.checked ? 'přidán' : 'odebrán');
+                                  if (e.target.checked) {
+                                    setFormData({ ...formData, managerIds: [...formData.managerIds, user.id] });
+                                  } else {
+                                    setFormData({ ...formData, managerIds: formData.managerIds.filter(id => id !== user.id) });
+                                  }
+                                }}
+                                className="rounded border-gray-300 text-primary focus:ring-primary"
+                              />
+                              <span className="text-sm text-gray-900">
+                                {user.first_name} {user.last_name} 
+                                <span className="text-gray-500 text-xs ml-1">
+                                  ({user.role === 'admin' ? 'Admin' : 'Manažer'}) [ID: {user.id}]
+                                </span>
+                              </span>
+                            </label>
+                          );
+                        })}
                       </div>
                     </div>
 
@@ -393,26 +413,35 @@ const ProjectsManagement: React.FC = () => {
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Stavbyvedoucí
                       </label>
+                      {editingProject && (
+                        <p className="text-xs text-gray-500 mb-1">
+                          Debug: Vybrané IDs: {JSON.stringify(formData.foremanIds)}
+                        </p>
+                      )}
                       <div className="max-h-40 overflow-y-auto border border-gray-300 rounded-md p-2 space-y-2">
-                        {users.filter(u => u.role === 'foreman').map(user => (
-                          <label key={user.id} className="flex items-center space-x-2 hover:bg-gray-50 p-1 rounded cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={formData.foremanIds.includes(user.id)}
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  setFormData({ ...formData, foremanIds: [...formData.foremanIds, user.id] });
-                                } else {
-                                  setFormData({ ...formData, foremanIds: formData.foremanIds.filter(id => id !== user.id) });
-                                }
-                              }}
-                              className="rounded border-gray-300 text-primary focus:ring-primary"
-                            />
-                            <span className="text-sm text-gray-900">
-                              {user.first_name} {user.last_name}
-                            </span>
-                          </label>
-                        ))}
+                        {users.filter(u => u.role === 'foreman').map(user => {
+                          const isChecked = formData.foremanIds.includes(user.id);
+                          return (
+                            <label key={user.id} className={`flex items-center space-x-2 p-1 rounded cursor-pointer ${isChecked ? 'bg-blue-50' : 'hover:bg-gray-50'}`}>
+                              <input
+                                type="checkbox"
+                                checked={isChecked}
+                                onChange={(e) => {
+                                  console.log(`Foreman ${user.id} (${user.first_name}):`, e.target.checked ? 'přidán' : 'odebrán');
+                                  if (e.target.checked) {
+                                    setFormData({ ...formData, foremanIds: [...formData.foremanIds, user.id] });
+                                  } else {
+                                    setFormData({ ...formData, foremanIds: formData.foremanIds.filter(id => id !== user.id) });
+                                  }
+                                }}
+                                className="rounded border-gray-300 text-primary focus:ring-primary"
+                              />
+                              <span className="text-sm text-gray-900">
+                                {user.first_name} {user.last_name} [ID: {user.id}]
+                              </span>
+                            </label>
+                          );
+                        })}
                       </div>
                     </div>
                   </div>
