@@ -115,11 +115,16 @@ export const createShift = async (req: AuthRequest, res: Response) => {
       );
       const projectName = (projectData[0] as any)?.name || 'Neznámý projekt';
 
-      // Získat úkoly pro tuto směnu
-      const [tasks] = await pool.query<RowDataPacket[]>(
+      // Získat úkoly pro tuto směnu z databáze
+      const [shiftTasks] = await pool.query<RowDataPacket[]>(
         'SELECT name as title, description FROM shift_tasks WHERE shift_id = ?',
         [shiftId]
       );
+
+      console.log(`📝 Úkolů načteno z DB pro email: ${(shiftTasks as any[]).length}`);
+      if ((shiftTasks as any[]).length > 0) {
+        console.log('📋 Úkoly z DB:', JSON.stringify(shiftTasks, null, 2));
+      }
 
       // Získat seznam pracovníků včetně autora
       const [workers] = await pool.query<RowDataPacket[]>(
@@ -135,19 +140,14 @@ export const createShift = async (req: AuthRequest, res: Response) => {
       const [year, month, day] = date.split('-');
       const formattedDate = `${day}.${month}.${year} ${start_time}`;
 
-      console.log(`📝 Úkolů k odeslání v emailu: ${tasks.length}`);
-      if (tasks.length > 0) {
-        console.log('📋 Úkoly:', tasks);
-      }
-
       // Odeslat email každému pracovníkovi a autorovi
       for (const worker of workers as any[]) {
         if (worker.email) {
-          console.log(`📧 Odesílám notifikaci o směně pro: ${worker.email}`);
+          console.log(`📧 Odesílám notifikaci o směně pro: ${worker.email} s ${(shiftTasks as any[]).length} úkoly`);
           await sendEmail({
             to: worker.email,
             subject: `Nová směna: ${shiftName}`,
-            html: getShiftAssignmentTemplate(shiftName, projectName, formattedDate, actionUrl, tasks as any[], worker_instructions),
+            html: getShiftAssignmentTemplate(shiftName, projectName, formattedDate, actionUrl, shiftTasks as any[], worker_instructions),
             notificationType: 'shift_assignment',
             relatedEntityType: 'shift',
             relatedEntityId: shiftId
