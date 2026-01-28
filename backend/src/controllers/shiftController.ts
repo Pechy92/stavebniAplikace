@@ -104,7 +104,7 @@ export const createShift = async (req: AuthRequest, res: Response) => {
 
       // Získat úkoly pro tuto směnu
       const [tasks] = await pool.query<RowDataPacket[]>(
-        'SELECT title, description, estimated_hours FROM shift_tasks WHERE shift_id = ?',
+        'SELECT name as title, description FROM shift_tasks WHERE shift_id = ?',
         [shiftId]
       );
 

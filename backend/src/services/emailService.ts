@@ -119,7 +119,6 @@ export function getShiftAssignmentTemplate(shiftName: string, projectName: strin
           <li style="margin: 10px 0;">
             <strong>${task.title}</strong>
             ${task.description ? `<br/><span style="color: #666;">${task.description}</span>` : ''}
-            ${task.estimated_hours ? `<br/><small>Odhadovaný čas: ${task.estimated_hours}h</small>` : ''}
           </li>
         `).join('')}
       </ul>
