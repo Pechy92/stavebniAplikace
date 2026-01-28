@@ -61,7 +61,9 @@ export const createProject = async (req: AuthRequest, res: Response) => {
   try {
     await connection.beginTransaction();
 
+    console.log('📥 Backend received body:', JSON.stringify(req.body, null, 2));
     const { name, customId, address, startDate, plannedEndDate, status, managerIds, foremanIds } = req.body;
+    console.log('📝 Extracted values:', { name, customId, address, startDate, plannedEndDate, status });
 
     // Vložit projekt
     const [result] = await connection.query(
@@ -108,7 +110,9 @@ export const updateProject = async (req: AuthRequest, res: Response) => {
     await connection.beginTransaction();
 
     const { id } = req.params;
+    console.log('📥 Backend UPDATE received body:', JSON.stringify(req.body, null, 2));
     const { name, customId, address, startDate, plannedEndDate, status, managerIds, foremanIds } = req.body;
+    console.log('📝 Extracted values for update:', { name, customId, address, startDate, plannedEndDate, status });
 
     // Aktualizovat projekt
     await connection.query(
