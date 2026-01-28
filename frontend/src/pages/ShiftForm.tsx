@@ -79,7 +79,8 @@ const ShiftForm: React.FC = () => {
         userIds: workerIds,
         date: dateStr,
         startTime: shift.start_time.substring(0, 5),
-        endTime: shift.end_time.substring(0, 5)
+        endTime: shift.end_time.substring(0, 5),
+        workerInstructions: shift.worker_instructions || ''
       });
     } catch (error) {
       console.error('Chyba při načítání dat směny:', error);
@@ -143,7 +144,8 @@ const ShiftForm: React.FC = () => {
         user_ids: formData.userIds.map((id) => parseInt(id)),
         date: formData.date,
         start_time: formData.startTime,
-        end_time: formData.endTime
+        end_time: formData.endTime,
+        worker_instructions: formData.workerInstructions
       };
 
       let shiftId = id;
@@ -352,6 +354,24 @@ const ShiftForm: React.FC = () => {
                 </div>
               </div>
             )}
+
+            {/* Instrukce pro pracovníky */}
+            <div>
+              <label htmlFor="workerInstructions" className="block text-sm font-medium text-gray-700 mb-1">
+                Instrukce pro pracovníky
+              </label>
+              <textarea
+                id="workerInstructions"
+                rows={4}
+                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+                value={formData.workerInstructions}
+                onChange={(e) => setFormData({ ...formData, workerInstructions: e.target.value })}
+                placeholder="Důležité informace pro pracovníky na této směně..."
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Tyto instrukce uvidí pracovníci v emailu a na detailu směny
+              </p>
+            </div>
 
             {/* Úkoly */}
             <div className="border-t pt-6">

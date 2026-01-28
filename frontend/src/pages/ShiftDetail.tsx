@@ -17,6 +17,7 @@ interface Shift {
   end_time: string;
   duration_hours: string | number;
   description?: string;
+  worker_instructions?: string;
   status?: string;
   created_at: string;
 }
@@ -255,6 +256,16 @@ const ShiftDetail: React.FC = () => {
                   <p className="text-sm text-blue-900 dark:text-blue-200">{translations.description}</p>
                 </div>
               )}
+            </div>
+          )}
+          {shift.worker_instructions && (
+            <div className="sm:col-span-2">
+              <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
+                Instrukce pro pracovníky
+              </label>
+              <div className="mt-1 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                <p className="text-gray-900 dark:text-white whitespace-pre-wrap">{shift.worker_instructions}</p>
+              </div>
             </div>
           )}
         </div>
