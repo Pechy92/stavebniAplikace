@@ -5,9 +5,14 @@ import { AuthRequest } from '../middleware/auth';
 
 export const getAllUsers = async (req: AuthRequest, res: Response) => {
   try {
-    const { role } = req.query;
+    const { role, include_inactive } = req.query;
     let query = 'SELECT id, email, first_name, last_name, phone, role, is_active, created_at FROM users WHERE 1=1';
     const params: any[] = [];
+
+    // Default: show only active users unless explicitly requested
+    if (include_inactive !== 'true') {
+      query += ' AND is_active = TRUE';
+    }
 
     if (role) {
       query += ' AND role = ?';

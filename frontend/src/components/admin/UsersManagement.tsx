@@ -34,7 +34,7 @@ const UsersManagement: React.FC = () => {
   const loadUsers = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`${API_URL}/users`, {
+      const response = await axios.get(`${API_URL}/users?include_inactive=true`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       // Map is_active to active for frontend
