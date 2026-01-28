@@ -159,3 +159,33 @@ export const deleteProject = async (req: AuthRequest, res: Response) => {
     res.status(500).json({ error: 'Chyba při mazání stavby' });
   }
 };
+
+export const getProjectManagers = async (req: AuthRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+    const [managers] = await pool.query(`
+      SELECT u.id, u.first_name, u.last_name, u.email, u.role
+      FROM users u
+      JOIN project_managers pm ON u.id = pm.manager_id
+      WHERE pm.project_id = ?
+    `, [id]);
+    res.json(managers);
+  } catch (error) {
+    res.status(500).json({ error: 'Chyba při načítání manažerů' });
+  }
+};
+
+export const getProjectForemen = async (req: AuthRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+    const [foremen] = await pool.query(`
+      SELECT u.id, u.first_name, u.last_name, u.email, u.role
+      FROM users u
+      JOIN project_foremen pf ON u.id = pf.foreman_id
+      WHERE pf.project_id = ?
+    `, [id]);
+    res.json(foremen);
+  } catch (error) {
+    res.status(500).json({ error: 'Chyba při načítání stavbyvedoucích' });
+  }
+};

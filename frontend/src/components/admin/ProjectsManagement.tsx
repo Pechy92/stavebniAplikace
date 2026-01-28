@@ -11,10 +11,20 @@ interface Project {
   planned_end_date: string;
   actual_end_date: string | null;
   status: string;
+  managers?: User[];
+  foremen?: User[];
+}
+
+interface User {
+  id: number;
+  first_name: string;
+  last_name: string;
+  role: string;
 }
 
 const ProjectsManagement: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
@@ -24,12 +34,27 @@ const ProjectsManagement: React.FC = () => {
     address: '',
     startDate: '',
     plannedEndDate: '',
-    status: 'active'
+    status: 'active',
+    managerIds: [] as number[],
+    foremanIds: [] as number[]
   });
 
   useEffect(() => {
     loadProjects();
+    loadUsers();
   }, []);
+
+  const loadUsers = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API_URL}/users`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setUsers(response.data);
+    } catch (error) {
+      console.error('Chyba při načítání uživatelů:', error);
+    }
+  };
 
   const loadProjects = async () => {
     try {
@@ -45,17 +70,45 @@ const ProjectsManagement: React.FC = () => {
     }
   };
 
-  const handleOpenModal = (project?: Project) => {
+  const handleOpenModal = async (project?: Project) => {
     if (project) {
       setEditingProject(project);
-      setFormData({
-        name: project.name,
-        customId: project.custom_id,
-        address: project.address,
-        startDate: project.start_date,
-        plannedEndDate: project.planned_end_date,
-        status: project.status
-      });
+      
+      // Načíst manažery a stavbyvedoucí projektu
+      try {
+        const token = localStorage.getItem('token');
+        const [managersRes, foremenRes] = await Promise.all([
+          axios.get(`${API_URL}/projects/${project.id}/managers`, {
+            headers: { Authorization: `Bearer ${token}` }
+          }),
+          axios.get(`${API_URL}/projects/${project.id}/foremen`, {
+            headers: { Authorization: `Bearer ${token}` }
+          })
+        ]);
+        
+        setFormData({
+          name: project.name,
+          customId: project.custom_id,
+          address: project.address,
+          startDate: project.start_date,
+          plannedEndDate: project.planned_end_date,
+          status: project.status,
+          managerIds: managersRes.data.map((m: User) => m.id),
+          foremanIds: foremenRes.data.map((f: User) => f.id)
+        });
+      } catch (error) {
+        console.error('Chyba při načítání přiřazení:', error);
+        setFormData({
+          name: project.name,
+          customId: project.custom_id,
+          address: project.address,
+          startDate: project.start_date,
+          plannedEndDate: project.planned_end_date,
+          status: project.status,
+          managerIds: [],
+          foremanIds: []
+        });
+      }
     } else {
       setEditingProject(null);
       setFormData({
@@ -64,7 +117,9 @@ const ProjectsManagement: React.FC = () => {
         address: '',
         startDate: '',
         plannedEndDate: '',
-        status: 'active'
+        status: 'active',
+        managerIds: [],
+        foremanIds: []
       });
     }
     setShowModal(true);
@@ -90,7 +145,9 @@ const ProjectsManagement: React.FC = () => {
             address: formData.address,
             start_date: formData.startDate,
             planned_end_date: formData.plannedEndDate,
-            status: formData.status
+            status: formData.status,
+            manager_ids: formData.managerIds,
+            foreman_ids: formData.foremanIds
           },
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -104,7 +161,9 @@ const ProjectsManagement: React.FC = () => {
             address: formData.address,
             start_date: formData.startDate,
             planned_end_date: formData.plannedEndDate,
-            status: formData.status
+            status: formData.status,
+            manager_ids: formData.managerIds,
+            foreman_ids: formData.foremanIds
           },
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -296,6 +355,52 @@ const ProjectsManagement: React.FC = () => {
                         <option value="paused">Pozastavený</option>
                         <option value="cancelled">Zrušený</option>
                       </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Manažeři
+                      </label>
+                      <select
+                        multiple
+                        size={4}
+                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+                        value={formData.managerIds.map(String)}
+                        onChange={(e) => {
+                          const selected = Array.from(e.target.selectedOptions, option => parseInt(option.value));
+                          setFormData({ ...formData, managerIds: selected });
+                        }}
+                      >
+                        {users.filter(u => u.role === 'manager' || u.role === 'admin').map(user => (
+                          <option key={user.id} value={user.id}>
+                            {user.first_name} {user.last_name} ({user.role === 'admin' ? 'Admin' : 'Manažer'})
+                          </option>
+                        ))}
+                      </select>
+                      <p className="mt-1 text-xs text-gray-500">Podržte Ctrl/Cmd pro výběr více manažerů</p>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Stavbyvedoucí
+                      </label>
+                      <select
+                        multiple
+                        size={4}
+                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+                        value={formData.foremanIds.map(String)}
+                        onChange={(e) => {
+                          const selected = Array.from(e.target.selectedOptions, option => parseInt(option.value));
+                          setFormData({ ...formData, foremanIds: selected });
+                        }}
+                      >
+                        {users.filter(u => u.role === 'foreman').map(user => (
+                          <option key={user.id} value={user.id}>
+                            {user.first_name} {user.last_name}
+                          </option>
+                        ))}
+                      </select>
+                      <p className="mt-1 text-xs text-gray-500">Podržte Ctrl/Cmd pro výběr více stavbyvedoucích</p>
                     </div>
                   </div>
                 </div>
