@@ -62,7 +62,10 @@ const ProjectsManagement: React.FC = () => {
       const response = await axios.get(`${API_URL}/projects`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      console.log('📋 Načteno projektů:', response.data.length, response.data);
+      console.log('📋 Načteno projektů:', response.data.length);
+      response.data.forEach((p: any, i: number) => {
+        console.log(`  ${i+1}. ID: ${p.id}, Custom ID: ${p.custom_id}, Název: ${p.name}`);
+      });
       setProjects(response.data);
     } catch (error) {
       console.error('Chyba při načítání projektů:', error);
@@ -259,14 +262,16 @@ const ProjectsManagement: React.FC = () => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {projects.map((project) => (
-              <tr key={project.id} className="hover:bg-gray-50 dark:bg-gray-700">
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {project.custom_id}
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-900">
-                  {project.name}
-                </td>
+            {projects.map((project) => {
+              console.log(`🔍 Zobrazuji projekt: ID=${project.id}, custom_id="${project.custom_id}", name="${project.name}"`);
+              return (
+                <tr key={project.id} className="hover:bg-gray-50 dark:bg-gray-700">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    {project.custom_id || <span className="text-red-500">(chybí)</span>}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-900">
+                    {project.name}
+                  </td>
                 <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
                   {project.address}
                 </td>
@@ -287,7 +292,8 @@ const ProjectsManagement: React.FC = () => {
                   </button>
                 </td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>
