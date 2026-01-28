@@ -44,7 +44,7 @@ export const getUserById = async (req: AuthRequest, res: Response) => {
 
 export const createUser = async (req: AuthRequest, res: Response) => {
   try {
-    const { email, password, firstName, lastName, phone, role } = req.body;
+    const { email, password, first_name, last_name, phone, role } = req.body;
 
     // Validace role
     if (!['admin', 'manager', 'foreman'].includes(role)) {
@@ -56,7 +56,7 @@ export const createUser = async (req: AuthRequest, res: Response) => {
     const [result] = await pool.query(
       `INSERT INTO users (email, password_hash, first_name, last_name, phone, role, created_by)
        VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [email, passwordHash, firstName, lastName, phone, role, req.user?.id]
+      [email, passwordHash, first_name, last_name, phone, role, req.user?.id]
     );
 
     res.status(201).json({ message: 'Uživatel vytvořen', userId: (result as any).insertId });
@@ -71,13 +71,16 @@ export const createUser = async (req: AuthRequest, res: Response) => {
 export const updateUser = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
-    const { email, firstName, lastName, phone, role, isActive } = req.body;
+    const { email, first_name, last_name, phone, role, is_active, active } = req.body;
+    
+    // Accept both 'active' and 'is_active' parameter names
+    const activeStatus = is_active !== undefined ? is_active : active;
 
     await pool.query(
       `UPDATE users 
        SET email = ?, first_name = ?, last_name = ?, phone = ?, role = ?, is_active = ?, updated_by = ?
        WHERE id = ?`,
-      [email, firstName, lastName, phone, role, isActive, req.user?.id, id]
+      [email, first_name, last_name, phone, role, activeStatus, req.user?.id, id]
     );
 
     res.json({ message: 'Uživatel aktualizován' });
@@ -109,9 +112,12 @@ export const deleteUser = async (req: AuthRequest, res: Response) => {
 export const resetUserPassword = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
-    const { newPassword } = req.body;
+    const { new_password, newPassword } = req.body;
+    
+    // Accept both parameter names
+    const password = new_password || newPassword;
 
-    const passwordHash = await bcrypt.hash(newPassword, 10);
+    const passwordHash = await bcrypt.hash(password, 10);
 
     await pool.query(
       'UPDATE users SET password_hash = ?, updated_by = ? WHERE id = ?',
