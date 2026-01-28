@@ -48,7 +48,8 @@ const ShiftForm: React.FC = () => {
     userIds: [] as string[],
     date: '',
     startTime: '07:00',
-    endTime: '15:00'
+    endTime: '15:00',
+    workerInstructions: ''
   });
 
   useEffect(() => {

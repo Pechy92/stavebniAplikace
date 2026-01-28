@@ -14,8 +14,12 @@ import translateRoutes from './routes/translateRoutes';
 import adminRoutes from './routes/adminRoutes';
 import { errorHandler } from './middleware/errorHandler';
 import { createTables } from './config/initDatabase';
+import { addWorkerInstructions } from './migrations/add-worker-instructions';
 
 dotenv.config();
+
+// Spustit migrace při startu
+addWorkerInstructions().catch(console.error);
 
 const app = express();
 const PORT = process.env.PORT || 3001;

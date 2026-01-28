@@ -110,7 +110,29 @@ export function getExtraWorkStatusChangeTemplate(extraWorkName: string, status: 
   `;
 }
 
-export function getShiftAssignmentTemplate(shiftName: string, projectName: string, startDate: string, actionUrl: string) {
+export function getShiftAssignmentTemplate(shiftName: string, projectName: string, startDate: string, actionUrl: string, tasks: any[] = [], workerInstructions: string = '') {
+  const tasksHtml = tasks && tasks.length > 0 
+    ? `
+      <h3>Úkoly na směně:</h3>
+      <ul style="background: white; padding: 15px; border-radius: 5px;">
+        ${tasks.map(task => `
+          <li style="margin: 10px 0;">
+            <strong>${task.title}</strong>
+            ${task.description ? `<br/><span style="color: #666;">${task.description}</span>` : ''}
+            ${task.estimated_hours ? `<br/><small>Odhadovaný čas: ${task.estimated_hours}h</small>` : ''}
+          </li>
+        `).join('')}
+      </ul>
+    `
+    : '';
+
+  const instructionsHtml = workerInstructions 
+    ? `
+      <h3>Instrukce pro pracovníky:</h3>
+      <div style="background: white; padding: 15px; border-radius: 5px; white-space: pre-wrap;">${workerInstructions}</div>
+    `
+    : '';
+
   return `
     <!DOCTYPE html>
     <html>
@@ -121,6 +143,8 @@ export function getShiftAssignmentTemplate(shiftName: string, projectName: strin
         .header { background-color: #DC2626; color: white; padding: 20px; text-align: center; }
         .content { padding: 20px; background-color: #f9f9f9; }
         .button { display: inline-block; padding: 10px 20px; background-color: #DC2626; color: white; text-decoration: none; border-radius: 5px; margin-top: 20px; }
+        ul { list-style: none; padding: 0; }
+        li { margin: 10px 0; padding: 10px; background: white; border-left: 3px solid #DC2626; }
       </style>
     </head>
     <body>
@@ -131,8 +155,10 @@ export function getShiftAssignmentTemplate(shiftName: string, projectName: strin
         <div class="content">
           <h2>Přiřazení na směnu</h2>
           <p>Byli jste přiřazeni na směnu <strong>${shiftName}</strong></p>
-          <p>Stavba: ${projectName}</p>
-          <p>Začátek: ${startDate}</p>
+          <p><strong>Stavba:</strong> ${projectName}</p>
+          <p><strong>Začátek:</strong> ${startDate}</p>
+          ${instructionsHtml}
+          ${tasksHtml}
           <a href="${actionUrl}" class="button">Zobrazit detail</a>
         </div>
       </div>

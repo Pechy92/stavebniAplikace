@@ -61,7 +61,7 @@ export const getAllShifts = async (req: AuthRequest, res: Response) => {
 
 export const createShift = async (req: AuthRequest, res: Response) => {
   try {
-    const { project_id, user_ids, date, start_time, end_time, name, description, status } = req.body;
+    const { project_id, user_ids, date, start_time, end_time, name, description, status, worker_instructions } = req.body;
 
     console.log('📝 Creating shift:', { project_id, user_ids, date, start_time, end_time });
 
@@ -78,9 +78,9 @@ export const createShift = async (req: AuthRequest, res: Response) => {
     const shiftName = name || `Směna ${date}`;
 
     const [result] = await pool.query<ResultSetHeader>(
-      `INSERT INTO shifts (name, project_id, start_datetime, end_datetime, description, status, created_by) 
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [shiftName, project_id, startDateTime, endDateTime, description || null, status || 'planned', req.user!.id]
+      `INSERT INTO shifts (name, project_id, start_datetime, end_datetime, description, worker_instructions, status, created_by) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [shiftName, project_id, startDateTime, endDateTime, description || null, worker_instructions || null, status || 'planned', req.user!.id]
     );
 
     const shiftId = result.insertId;
@@ -102,6 +102,12 @@ export const createShift = async (req: AuthRequest, res: Response) => {
       );
       const projectName = (projectData[0] as any)?.name || 'Neznámý projekt';
 
+      // Získat úkoly pro tuto směnu
+      const [tasks] = await pool.query<RowDataPacket[]>(
+        'SELECT title, description, estimated_hours FROM shift_tasks WHERE shift_id = ?',
+        [shiftId]
+      );
+
       // Získat seznam pracovníků včetně autora
       const [workers] = await pool.query<RowDataPacket[]>(
         `SELECT DISTINCT u.id, u.email, u.first_name, u.last_name 
@@ -120,7 +126,7 @@ export const createShift = async (req: AuthRequest, res: Response) => {
           await sendEmail({
             to: worker.email,
             subject: `Nová směna: ${shiftName}`,
-            html: getShiftAssignmentTemplate(shiftName, projectName, formattedDate, actionUrl),
+            html: getShiftAssignmentTemplate(shiftName, projectName, formattedDate, actionUrl, tasks as any[], worker_instructions),
             notificationType: 'shift_assignment',
             relatedEntityType: 'shift',
             relatedEntityId: shiftId
