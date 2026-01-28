@@ -62,21 +62,21 @@ export const createProject = async (req: AuthRequest, res: Response) => {
     await connection.beginTransaction();
 
     console.log('📥 Backend received body:', JSON.stringify(req.body, null, 2));
-    const { name, customId, address, startDate, plannedEndDate, status, managerIds, foremanIds } = req.body;
-    console.log('📝 Extracted values:', { name, customId, address, startDate, plannedEndDate, status });
+    const { name, custom_id, address, start_date, planned_end_date, status, manager_ids, foreman_ids } = req.body;
+    console.log('📝 Extracted values:', { name, custom_id, address, start_date, planned_end_date, status });
 
     // Vložit projekt
     const [result] = await connection.query(
       `INSERT INTO projects (name, custom_id, address, start_date, planned_end_date, status, created_by)
        VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [name, customId, address, startDate, plannedEndDate, status || 'preparation', req.user?.id]
+      [name, custom_id, address, start_date, planned_end_date, status || 'preparation', req.user?.id]
     );
 
     const projectId = (result as any).insertId;
 
     // Přiřadit manažery
-    if (managerIds && managerIds.length > 0) {
-      for (const managerId of managerIds) {
+    if (manager_ids && manager_ids.length > 0) {
+      for (const managerId of manager_ids) {
         await connection.query(
           'INSERT INTO project_managers (project_id, manager_id) VALUES (?, ?)',
           [projectId, managerId]
@@ -85,8 +85,8 @@ export const createProject = async (req: AuthRequest, res: Response) => {
     }
 
     // Přiřadit stavbyvedoucí
-    if (foremanIds && foremanIds.length > 0) {
-      for (const foremanId of foremanIds) {
+    if (foreman_ids && foreman_ids.length > 0) {
+      for (const foremanId of foreman_ids) {
         await connection.query(
           'INSERT INTO project_foremen (project_id, foreman_id) VALUES (?, ?)',
           [projectId, foremanId]
@@ -111,21 +111,21 @@ export const updateProject = async (req: AuthRequest, res: Response) => {
 
     const { id } = req.params;
     console.log('📥 Backend UPDATE received body:', JSON.stringify(req.body, null, 2));
-    const { name, customId, address, startDate, plannedEndDate, status, managerIds, foremanIds } = req.body;
-    console.log('📝 Extracted values for update:', { name, customId, address, startDate, plannedEndDate, status });
+    const { name, custom_id, address, start_date, planned_end_date, status, manager_ids, foreman_ids } = req.body;
+    console.log('📝 Extracted values for update:', { name, custom_id, address, start_date, planned_end_date, status });
 
     // Aktualizovat projekt
     await connection.query(
       `UPDATE projects 
        SET name = ?, custom_id = ?, address = ?, start_date = ?, planned_end_date = ?, status = ?, updated_by = ?
        WHERE id = ?`,
-      [name, customId, address, startDate, plannedEndDate, status, req.user?.id, id]
+      [name, custom_id, address, start_date, planned_end_date, status, req.user?.id, id]
     );
 
     // Smazat staré přiřazení manažerů a přidat nové
     await connection.query('DELETE FROM project_managers WHERE project_id = ?', [id]);
-    if (managerIds && managerIds.length > 0) {
-      for (const managerId of managerIds) {
+    if (manager_ids && manager_ids.length > 0) {
+      for (const managerId of manager_ids) {
         await connection.query(
           'INSERT INTO project_managers (project_id, manager_id) VALUES (?, ?)',
           [id, managerId]
@@ -135,8 +135,8 @@ export const updateProject = async (req: AuthRequest, res: Response) => {
 
     // Smazat staré přiřazení stavbyvedoucích a přidat nové
     await connection.query('DELETE FROM project_foremen WHERE project_id = ?', [id]);
-    if (foremanIds && foremanIds.length > 0) {
-      for (const foremanId of foremanIds) {
+    if (foreman_ids && foreman_ids.length > 0) {
+      for (const foremanId of foreman_ids) {
         await connection.query(
           'INSERT INTO project_foremen (project_id, foreman_id) VALUES (?, ?)',
           [id, foremanId]
