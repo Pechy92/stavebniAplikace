@@ -146,12 +146,19 @@ const ShiftForm: React.FC = () => {
         start_time: formData.startTime,
         end_time: formData.endTime,
         worker_instructions: formData.workerInstructions,
-        tasks: tasks.filter(t => !t.id).map(t => ({
-          name: t.name,
-          description: t.description,
-          assigned_worker_id: t.assigned_worker_id ? parseInt(t.assigned_worker_id) : null,
-          due_date: t.due_date
-        }))
+        tasks: isEditMode 
+          ? tasks.filter(t => !t.id || typeof t.id === 'string').map(t => ({
+              name: t.name,
+              description: t.description,
+              assigned_worker_id: t.assigned_worker_id ? parseInt(t.assigned_worker_id) : null,
+              due_date: t.due_date
+            }))
+          : tasks.map(t => ({
+              name: t.name,
+              description: t.description,
+              assigned_worker_id: t.assigned_worker_id ? parseInt(t.assigned_worker_id) : null,
+              due_date: t.due_date
+            }))
       };
 
       console.log('📤 Odesílám směnu s úkoly:', payload);
