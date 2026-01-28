@@ -73,6 +73,7 @@ const ProjectsManagement: React.FC = () => {
 
   const handleOpenModal = async (project?: Project) => {
     if (project) {
+      console.log('📝 Editace projektu:', project);
       setEditingProject(project);
       
       // Načíst manažery a stavbyvedoucí projektu
@@ -96,24 +97,41 @@ const ProjectsManagement: React.FC = () => {
         console.log('🔢 Manager IDs:', managerIds);
         console.log('🔢 Foreman IDs:', foremanIds);
         
-        setFormData({
+        // Převést datum na YYYY-MM-DD formát pro input[type="date"]
+        const formatDate = (dateString: string) => {
+          if (!dateString) return '';
+          const date = new Date(dateString);
+          return date.toISOString().split('T')[0];
+        };
+        
+        const formDataToSet = {
           name: project.name,
           customId: project.custom_id,
           address: project.address,
-          startDate: project.start_date,
-          plannedEndDate: project.planned_end_date,
+          startDate: formatDate(project.start_date),
+          plannedEndDate: formatDate(project.planned_end_date),
           status: project.status,
           managerIds: managerIds,
           foremanIds: foremanIds
-        });
+        };
+        
+        console.log('📋 Nastavuji formData:', formDataToSet);
+        setFormData(formDataToSet);
       } catch (error) {
         console.error('Chyba při načítání přiřazení:', error);
+        
+        const formatDate = (dateString: string) => {
+          if (!dateString) return '';
+          const date = new Date(dateString);
+          return date.toISOString().split('T')[0];
+        };
+        
         setFormData({
           name: project.name,
           customId: project.custom_id,
           address: project.address,
-          startDate: project.start_date,
-          plannedEndDate: project.planned_end_date,
+          startDate: formatDate(project.start_date),
+          plannedEndDate: formatDate(project.planned_end_date),
           status: project.status,
           managerIds: [],
           foremanIds: []
