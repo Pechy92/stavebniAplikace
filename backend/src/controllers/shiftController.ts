@@ -61,9 +61,9 @@ export const getAllShifts = async (req: AuthRequest, res: Response) => {
 
 export const createShift = async (req: AuthRequest, res: Response) => {
   try {
-    const { project_id, user_ids, date, start_time, end_time, name, description, status, worker_instructions } = req.body;
+    const { project_id, user_ids, date, start_time, end_time, name, description, status, worker_instructions, tasks } = req.body;
 
-    console.log('📝 Creating shift:', { project_id, user_ids, date, start_time, end_time });
+    console.log('📝 Creating shift:', { project_id, user_ids, date, start_time, end_time, tasks: tasks?.length || 0 });
 
     if (!project_id || !date || !start_time || !end_time) {
       return res.status(400).json({ message: 'Všechna pole jsou povinná' });
@@ -92,6 +92,19 @@ export const createShift = async (req: AuthRequest, res: Response) => {
       );
     }
 
+    // Vložit úkoly do databáze PŘED odesláním emailů
+    if (Array.isArray(tasks) && tasks.length > 0) {
+      console.log(`📝 Přidávám ${tasks.length} úkolů k směně`);
+      for (const task of tasks) {
+        if (task.name) {
+          await pool.query(
+            `INSERT INTO shift_tasks (shift_id, name, description, assigned_worker_id, due_date, order_index) 
+             VALUES (?, ?, ?, ?, ?, ?)`,
+            [shiftId, task.name, task.description || null, task.assigned_worker_id || null, task.due_date || null, task.order_index || 0]
+          );
+        }
+      }
+    }
 
     // Odeslat notifikace pracovníkům a autorovi
     try {

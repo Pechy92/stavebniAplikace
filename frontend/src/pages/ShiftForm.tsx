@@ -145,8 +145,16 @@ const ShiftForm: React.FC = () => {
         date: formData.date,
         start_time: formData.startTime,
         end_time: formData.endTime,
-        worker_instructions: formData.workerInstructions
+        worker_instructions: formData.workerInstructions,
+        tasks: tasks.filter(t => !t.id).map(t => ({
+          name: t.name,
+          description: t.description,
+          assigned_worker_id: t.assigned_worker_id ? parseInt(t.assigned_worker_id) : null,
+          due_date: t.due_date
+        }))
       };
+
+      console.log('📤 Odesílám směnu s úkoly:', payload);
 
       let shiftId = id;
       if (isEditMode && id) {
@@ -157,6 +165,31 @@ const ShiftForm: React.FC = () => {
             headers: { Authorization: `Bearer ${token}` }
           }
         );
+        
+        // V edit módu přidat úkoly samostatně (email se již neodesílá)
+        if (tasks.length > 0 && shiftId) {
+          for (const task of tasks) {
+            if (!task.id) { // Přidat jen nové úkoly
+              try {
+                await axios.post(
+                  `${API_URL}/shifts/${shiftId}/tasks`,
+                  {
+                    name: task.name,
+                    description: task.description,
+                    assigned_worker_id: task.assigned_worker_id ? parseInt(task.assigned_worker_id) : null,
+                    due_date: task.due_date
+                  },
+                  {
+                    headers: { Authorization: `Bearer ${token}` }
+                  }
+                );
+              } catch (error) {
+                console.error('Chyba při přidávání úkolu:', error);
+              }
+            }
+          }
+        }
+        
         alert(t('shifts.shiftUpdated'));
       } else {
         const response = await axios.post(
@@ -168,30 +201,6 @@ const ShiftForm: React.FC = () => {
         );
         shiftId = String(response.data.id);
         alert(t('shifts.shiftCreated'));
-      }
-
-      // Přidat úkoly ke směně
-      if (tasks.length > 0 && shiftId) {
-        for (const task of tasks) {
-          if (!task.id) { // Přidat jen nové úkoly
-            try {
-              await axios.post(
-                `${API_URL}/shifts/${shiftId}/tasks`,
-                {
-                  name: task.name,
-                  description: task.description,
-                  assigned_worker_id: task.assigned_worker_id ? parseInt(task.assigned_worker_id) : null,
-                  due_date: task.due_date
-                },
-                {
-                  headers: { Authorization: `Bearer ${token}` }
-                }
-              );
-            } catch (error) {
-              console.error('Chyba při přidávání úkolu:', error);
-            }
-          }
-        }
       }
 
       navigate('/shifts');
