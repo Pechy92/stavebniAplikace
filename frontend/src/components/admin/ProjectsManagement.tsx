@@ -62,6 +62,7 @@ const ProjectsManagement: React.FC = () => {
       const response = await axios.get(`${API_URL}/projects`, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      console.log('📋 Načteno projektů:', response.data.length, response.data);
       setProjects(response.data);
     } catch (error) {
       console.error('Chyba při načítání projektů:', error);
@@ -133,6 +134,8 @@ const ProjectsManagement: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('📤 Odesílám projekt:', formData);
+    
     try {
       const token = localStorage.getItem('token');
       
@@ -170,9 +173,10 @@ const ProjectsManagement: React.FC = () => {
         alert('Projekt byl úspěšně vytvořen');
       }
       
+      await loadProjects(); // Počkat na refresh seznamu
       handleCloseModal();
-      loadProjects();
     } catch (error: any) {
+      console.error('❌ Chyba při ukládání projektu:', error.response?.data);
       alert(error.response?.data?.message || 'Chyba při ukládání projektu');
     }
   };
@@ -358,49 +362,58 @@ const ProjectsManagement: React.FC = () => {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
                         Manažeři
                       </label>
-                      <select
-                        multiple
-                        size={4}
-                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
-                        value={formData.managerIds.map(String)}
-                        onChange={(e) => {
-                          const selected = Array.from(e.target.selectedOptions, option => parseInt(option.value));
-                          setFormData({ ...formData, managerIds: selected });
-                        }}
-                      >
+                      <div className="max-h-40 overflow-y-auto border border-gray-300 rounded-md p-2 space-y-2">
                         {users.filter(u => u.role === 'manager' || u.role === 'admin').map(user => (
-                          <option key={user.id} value={user.id}>
-                            {user.first_name} {user.last_name} ({user.role === 'admin' ? 'Admin' : 'Manažer'})
-                          </option>
+                          <label key={user.id} className="flex items-center space-x-2 hover:bg-gray-50 p-1 rounded cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={formData.managerIds.includes(user.id)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setFormData({ ...formData, managerIds: [...formData.managerIds, user.id] });
+                                } else {
+                                  setFormData({ ...formData, managerIds: formData.managerIds.filter(id => id !== user.id) });
+                                }
+                              }}
+                              className="rounded border-gray-300 text-primary focus:ring-primary"
+                            />
+                            <span className="text-sm text-gray-900">
+                              {user.first_name} {user.last_name} 
+                              <span className="text-gray-500 text-xs ml-1">({user.role === 'admin' ? 'Admin' : 'Manažer'})</span>
+                            </span>
+                          </label>
                         ))}
-                      </select>
-                      <p className="mt-1 text-xs text-gray-500">Podržte Ctrl/Cmd pro výběr více manažerů</p>
+                      </div>
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
                         Stavbyvedoucí
                       </label>
-                      <select
-                        multiple
-                        size={4}
-                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
-                        value={formData.foremanIds.map(String)}
-                        onChange={(e) => {
-                          const selected = Array.from(e.target.selectedOptions, option => parseInt(option.value));
-                          setFormData({ ...formData, foremanIds: selected });
-                        }}
-                      >
+                      <div className="max-h-40 overflow-y-auto border border-gray-300 rounded-md p-2 space-y-2">
                         {users.filter(u => u.role === 'foreman').map(user => (
-                          <option key={user.id} value={user.id}>
-                            {user.first_name} {user.last_name}
-                          </option>
+                          <label key={user.id} className="flex items-center space-x-2 hover:bg-gray-50 p-1 rounded cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={formData.foremanIds.includes(user.id)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setFormData({ ...formData, foremanIds: [...formData.foremanIds, user.id] });
+                                } else {
+                                  setFormData({ ...formData, foremanIds: formData.foremanIds.filter(id => id !== user.id) });
+                                }
+                              }}
+                              className="rounded border-gray-300 text-primary focus:ring-primary"
+                            />
+                            <span className="text-sm text-gray-900">
+                              {user.first_name} {user.last_name}
+                            </span>
+                          </label>
                         ))}
-                      </select>
-                      <p className="mt-1 text-xs text-gray-500">Podržte Ctrl/Cmd pro výběr více stavbyvedoucích</p>
+                      </div>
                     </div>
                   </div>
                 </div>
