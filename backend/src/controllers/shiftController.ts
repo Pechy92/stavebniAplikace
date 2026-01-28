@@ -2,6 +2,7 @@ import { Response } from 'express';
 import pool from '../config/database';
 import { RowDataPacket, ResultSetHeader } from 'mysql2';
 import { AuthRequest } from '../middleware/auth';
+import { sendEmail, getShiftAssignmentTemplate } from '../services/emailService';
 import path from 'path';
 import fs from 'fs';
 
@@ -89,6 +90,46 @@ export const createShift = async (req: AuthRequest, res: Response) => {
         `INSERT INTO shift_workers (shift_id, worker_id) VALUES (?, ?)`,
         [shiftId, uid]
       );
+    }
+
+
+    // Odeslat notifikace pracovníkům a autorovi
+    try {
+      // Získat detaily projektu a pracovníků
+      const [projectData] = await pool.query<RowDataPacket[]>(
+        'SELECT name FROM projects WHERE id = ?',
+        [project_id]
+      );
+      const projectName = (projectData[0] as any)?.name || 'Neznámý projekt';
+
+      // Získat seznam pracovníků včetně autora
+      const [workers] = await pool.query<RowDataPacket[]>(
+        `SELECT DISTINCT u.id, u.email, u.first_name, u.last_name 
+         FROM users u 
+         WHERE u.id IN (?) OR u.id = ?`,
+        [user_ids, req.user!.id]
+      );
+
+      const actionUrl = `${process.env.FRONTEND_URL}/shifts/${shiftId}`;
+      const formattedDate = `${date} ${start_time}`;
+
+      // Odeslat email každému pracovníkovi a autorovi
+      for (const worker of workers as any[]) {
+        if (worker.email) {
+          console.log(`📧 Odesílám notifikaci o směně pro: ${worker.email}`);
+          await sendEmail({
+            to: worker.email,
+            subject: `Nová směna: ${shiftName}`,
+            html: getShiftAssignmentTemplate(shiftName, projectName, formattedDate, actionUrl),
+            notificationType: 'shift_assignment',
+            relatedEntityType: 'shift',
+            relatedEntityId: shiftId
+          });
+        }
+      }
+    } catch (emailError) {
+      console.error('⚠️ Chyba při odesílání notifikací o směně:', emailError);
+      // Pokračovat i když email selže
     }
 
     console.log('✅ Shift created successfully:', shiftId);
