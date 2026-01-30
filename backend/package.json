@@ -8,7 +8,8 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "seed": "ts-node src/seeds/seed.ts",
-    "init-db": "node init-db-railway.js"
+    "init-db": "node init-db-railway.js",
+    "add-marek-users": "ts-node src/scripts/add-marek-users.ts"
   },
   "keywords": [
     "construction",

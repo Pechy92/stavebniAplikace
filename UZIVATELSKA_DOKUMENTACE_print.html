@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stavební Aplikace - Uživatelská dokumentace</title>
+    <style>
+        @media print {
+            @page {
+                margin: 2cm;
+                size: A4;
+            }
+            body {
+                font-size: 10pt;
+            }
+            h1 {
+                page-break-before: always;
+            }
+            h1:first-of-type {
+                page-break-before: avoid;
+            }
+            pre, table, blockquote {
+                page-break-inside: avoid;
+            }
+            .print-button, .print-instructions {
+                display: none;
+            }
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 210mm;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fff;
+        }
+        
+        h1 {
+            color: #2563eb;
+            border-bottom: 3px solid #2563eb;
+            padding-bottom: 10px;
+            margin-top: 40px;
+        }
+        
+        h2 {
+            color: #1e40af;
+            margin-top: 30px;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 5px;
+        }
+        
+        h3 {
+            color: #1e3a8a;
+            margin-top: 20px;
+        }
+        
+        h4 {
+            color: #334155;
+            margin-top: 15px;
+        }
+        
+        code {
+            background: #f3f4f6;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        
+        pre {
+            background: #1f2937;
+            color: #f9fafb;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        
+        pre code {
+            background: transparent;
+            color: inherit;
+            padding: 0;
+        }
+        
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            border: 1px solid #e5e7eb;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        th {
+            background: #f3f4f6;
+            font-weight: 600;
+        }
+        
+        tr:nth-child(even) {
+            background: #f9fafb;
+        }
+        
+        blockquote {
+            border-left: 4px solid #2563eb;
+            margin: 20px 0;
+            padding: 10px 20px;
+            background: #eff6ff;
+        }
+        
+        ul, ol {
+            margin: 15px 0;
+            padding-left: 30px;
+        }
+        
+        li {
+            margin: 5px 0;
+        }
+        
+        a {
+            color: #2563eb;
+            text-decoration: none;
+        }
+        
+        a:hover {
+            text-decoration: underline;
+        }
+        
+        .cover-page {
+            text-align: center;
+            padding: 100px 0;
+            page-break-after: always;
+        }
+        
+        .cover-page h1 {
+            font-size: 3em;
+            border: none;
+            margin-bottom: 20px;
+        }
+        
+        .cover-page .subtitle {
+            font-size: 1.5em;
+            color: #64748b;
+            margin-bottom: 50px;
+        }
+        
+        .cover-page .version {
+            font-size: 1.2em;
+            color: #94a3b8;
+        }
+        
+        .print-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #2563eb;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+        
+        .print-button:hover {
+            background: #1e40af;
+        }
+        
+        .print-instructions {
+            background: #eff6ff;
+            border: 2px solid #2563eb;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0 40px 0;
+        }
+        
+        .print-instructions h3 {
+            margin-top: 0;
+            color: #2563eb;
+        }
+        
+        .print-instructions ol {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <button class="print-button" onclick="window.print()">🖨️ Vytisknout / Uložit jako PDF</button>
+    
+    <div class="cover-page">
+        <h1>Stavební Aplikace</h1>
+        <div class="subtitle">Uživatelská dokumentace</div>
+        <div class="version">Verze 1.0 | Leden 2026</div>
+    </div>
+    
+    <div class="print-instructions">
+        <h3>📥 Jak vytvořit PDF z tohoto dokumentu:</h3>
+        <ol>
+            <li>Klikněte na tlačítko "🖨️ Vytisknout / Uložit jako PDF" v pravém horním rohu</li>
+            <li>V dialogu tisku vyberte jako tiskárnu <strong>"Uložit jako PDF"</strong> nebo <strong>"Microsoft Print to PDF"</strong></li>
+            <li>Nastavte velikost papíru na <strong>A4</strong></li>
+            <li>Klikněte na <strong>"Uložit"</strong> nebo <strong>"Tisk"</strong></li>
+            <li>Vyberte umístění a název souboru</li>
+        </ol>
+        <p><strong>Tip:</strong> V nastavení tisku můžete upravit okraje a orientaci stránky.</p>
+    </div>
+    
+    <h1 id="stavebni-aplikace-uzivatelska-dokumentace">Stavební Aplikace - Uživatelská dokumentace</h1>
+<h2 id="obsah">Obsah</h2>
+<ol>
+<li><a href="#úvod">Úvod</a></li>
+<li><a href="#přihlášení-a-role-uživatelů">Přihlášení a role uživatelů</a></li>
+<li><a href="#dashboard">Dashboard - Přehled</a></li>
+<li><a href="#správa-projektů">Správa projektů</a></li>
+<li><a href="#správa-směn">Správa směn</a></li>
+<li><a href="#mimořádné-práce">Mimořádné práce</a></li>
+<li><a href="#správa-materiálů">Správa materiálů</a></li>
+<li><a href="#správa-uživatelů">Správa uživatelů</a></li>
+<li><a href="#notifikace">Notifikace</a></li>
+<li><a href="#časté-problémy-a-řešení">Časté problémy a řešení</a></li>
+</ol>
+<hr />
+<h2 id="uvod">Úvod</h2>
+<p>Stavební aplikace je komplexní systém pro řízení stavebních projektů, správu směn pracovníků, evidenci mimořádných prací a materiálů. Aplikace podporuje čtyři typy uživatelů s různými oprávněními.</p>
+<p><strong>URL aplikace:</strong> https://stavebniaplikace.up.railway.app</p>
+<hr />
+<h2 id="prihlaseni-a-role-uzivatelu">Přihlášení a role uživatelů</h2>
+<h3 id="prihlaseni">Přihlášení</h3>
+<ol>
+<li>Otevřete aplikaci v prohlížeči</li>
+<li>Zadejte svůj <strong>email</strong> a <strong>heslo</strong></li>
+<li>Klikněte na tlačítko <strong>"Přihlásit se"</strong></li>
+</ol>
+<blockquote>
+<p><strong>Poznámka:</strong> Pokud zapomenete heslo, kontaktujte administrátora systému pro reset hesla.</p>
+</blockquote>
+<h3 id="role-uzivatelu">Role uživatelů</h3>
+<h4 id="admin-administrator">🔴 Admin (Administrátor)</h4>
+<p><strong>Plná práva ke všem funkcím:</strong>
+- Správa všech projektů
+- Správa všech směn
+- Správa mimořádných prací
+- Správa materiálů a ceníků
+- Správa uživatelských účtů
+- Přístup ke všem reportům</p>
+<p><strong>Testovací účty:</strong>
+- <code>pecholtmartin+admin@gmail.com</code> / heslo: <code>admin123</code>
+- <code>pecholtmarek+admin@gmail.com</code> / heslo: <code>admin123</code></p>
+<h4 id="manager-manazer">🟡 Manager (Manažer)</h4>
+<p><strong>Správa projektů a koordinace:</strong>
+- Správa přiřazených projektů
+- Schvalování mimořádných prací
+- Přehled směn na projektech
+- Export reportů
+- Správa projektových materiálů</p>
+<p><strong>Testovací účty:</strong>
+- <code>pecholtmartin+manager1@gmail.com</code> / heslo: <code>manager123</code>
+- <code>pecholtmarek+manager1@gmail.com</code> / heslo: <code>manager123</code></p>
+<h4 id="foreman-stavbyvedouci">🟢 Foreman (Stavbyvedoucí)</h4>
+<p><strong>Operativní řízení stavby:</strong>
+- Vytváření a správa směn
+- Přidávání mimořádných prací
+- Přiřazování pracovníků ke směnám
+- Fotodokumentace prací
+- Reportování materiálů</p>
+<p><strong>Testovací účty:</strong>
+- <code>pecholtmartin+foreman1@gmail.com</code> / heslo: <code>foreman123</code>
+- <code>pecholtmarek+foreman1@gmail.com</code> / heslo: <code>foreman123</code></p>
+<h4 id="worker-delnik">🔵 Worker (Dělník)</h4>
+<p><strong>Základní přístup:</strong>
+- Zobrazení přiřazených směn
+- Zobrazení úkolů
+- Notifikace o nových směnách</p>
+<p><strong>Testovací účty:</strong>
+- <code>pecholtmartin+worker1@gmail.com</code> až <code>worker5@gmail.com</code> / heslo: <code>worker123</code>
+- <code>pecholtmarek+worker1@gmail.com</code> až <code>worker5@gmail.com</code> / heslo: <code>worker123</code></p>
+<hr />
+<h2 id="dashboard">Dashboard</h2>
+<p>Po přihlášení se zobrazí <strong>Dashboard</strong> (hlavní stránka) s přehledem:</p>
+<h3 id="administratormanazer">Administrátor/Manažer</h3>
+<ul>
+<li><strong>Statistiky projektů:</strong> Počet aktivních, dokončených a připravovaných projektů</li>
+<li><strong>Statistiky směn:</strong> Celkový počet směn, naplánované směny</li>
+<li><strong>Mimořádné práce:</strong> Počet mimořádných prací a jejich stav</li>
+<li><strong>Rychlé akce:</strong> Tlačítka pro vytvoření nového projektu, směny nebo mimořádné práce</li>
+</ul>
+<h3 id="stavbyvedouci">Stavbyvedoucí</h3>
+<ul>
+<li><strong>Přehled přiřazených projektů</strong></li>
+<li><strong>Nadcházející směny</strong></li>
+<li><strong>Mimořádné práce k schválení</strong></li>
+<li><strong>Rychlé akce:</strong> Vytvoření směny, přidání mimořádné práce</li>
+</ul>
+<h3 id="delnik">Dělník</h3>
+<ul>
+<li><strong>Moje směny:</strong> Seznam přiřazených směn (dnešní, nadcházející)</li>
+<li><strong>Úkoly:</strong> Seznam úkolů k vypracování</li>
+<li><strong>Notifikace:</strong> Upozornění na nové směny</li>
+</ul>
+<blockquote>
+<p><strong>Tip:</strong> Dashboard se automaticky aktualizuje podle vaší role.</p>
+</blockquote>
+<hr />
+<h2 id="sprava-projektu">Správa projektů</h2>
+<p><em>Pro administrátory a manažery</em></p>
+<h3 id="zobrazeni-seznamu-projektu">Zobrazení seznamu projektů</h3>
+<ol>
+<li>Klikněte na <strong>"Projekty"</strong> v levém menu</li>
+<li>Zobrazí se tabulka všech projektů s informacemi:</li>
+<li><strong>Číslo projektu</strong> (např. PROJ-001)</li>
+<li><strong>Název projektu</strong></li>
+<li><strong>Adresa</strong></li>
+<li><strong>Datum zahájení</strong></li>
+<li><strong>Plánované ukončení</strong></li>
+<li><strong>Stav</strong> (Aktivní, Dokončeno, Příprava)</li>
+<li><strong>Manažeři</strong></li>
+<li><strong>Stavbyvedoucí</strong></li>
+</ol>
+<h3 id="vytvoreni-noveho-projektu">Vytvoření nového projektu</h3>
+<ol>
+<li>Klikněte na tlačítko <strong>"+ Nový projekt"</strong></li>
+<li>Vyplňte formulář:</li>
+<li><strong>Název projektu:</strong> Např. "Administrativní budova Ostrava"</li>
+<li><strong>Číslo projektu:</strong> Např. "PROJ-2026-001" (unikátní identifikátor)</li>
+<li><strong>Adresa:</strong> Např. "Hlavní třída 123, 702 00 Ostrava"</li>
+<li><strong>Datum zahájení:</strong> Vyberte datum ze kalendáře</li>
+<li><strong>Plánované ukončení:</strong> Vyberte datum ze kalendáře</li>
+<li><strong>Stav:</strong> Aktivní / Příprava / Dokončeno</li>
+<li><strong>Manažeři:</strong> Zaškrtněte jednoho nebo více manažerů (checkbox seznam)</li>
+<li>
+<p><strong>Stavbyvedoucí:</strong> Zaškrtněte jednoho nebo více stavbyvedoucích</p>
+</li>
+<li>
+<p>Klikněte <strong>"Vytvořit"</strong></p>
+</li>
+</ol>
+<blockquote>
+<p><strong>Poznámka:</strong> Vybrané osoby budou zobrazeny s modrým pozadím.</p>
+</blockquote>
+<h3 id="editace-projektu">Editace projektu</h3>
+<ol>
+<li>V seznamu projektů klikněte na <strong>"Upravit"</strong> u příslušného projektu</li>
+<li>Upravte potřebné údaje</li>
+<li>Klikněte <strong>"Uložit změny"</strong></li>
+</ol>
+<blockquote>
+<p><strong>Tip:</strong> Při editaci se automaticky načtou aktuálně přiřazení manažeři a stavbyvedoucí.</p>
+</blockquote>
+<h3 id="mazani-projektu">Mazání projektu</h3>
+<ol>
+<li>V seznamu projektů klikněte na <strong>"Smazat"</strong> u příslušného projektu</li>
+<li>Potvrďte smazání</li>
+</ol>
+<blockquote>
+<p><strong>Varování:</strong> Smazáním projektu se smažou i všechny související směny a mimořádné práce!</p>
+</blockquote>
+<hr />
+<h2 id="sprava-smen">Správa směn</h2>
+<p><em>Pro administrátory, manažery a stavbyvedoucí</em></p>
+<h3 id="zobrazeni-seznamu-smen">Zobrazení seznamu směn</h3>
+<ol>
+<li>Klikněte na <strong>"Směny"</strong> v levém menu</li>
+<li>Zobrazí se seznam všech směn s informacemi:</li>
+<li><strong>Projekt:</strong> Název projektu</li>
+<li><strong>Datum:</strong> Datum směny</li>
+<li><strong>Čas:</strong> Začátek - konec (např. 07:00 - 15:00)</li>
+<li><strong>Pracovníci:</strong> Počet přiřazených pracovníků</li>
+<li><strong>Úkoly:</strong> Počet úkolů</li>
+<li><strong>Stav:</strong> Naplánováno / Probíhá / Dokončeno</li>
+</ol>
+<h3 id="vytvoreni-nove-smeny">Vytvoření nové směny</h3>
+<ol>
+<li>Klikněte na tlačítko <strong>"+ Nová směna"</strong></li>
+<li>Vyplňte základní informace:</li>
+<li><strong>Projekt:</strong> Vyberte projekt ze seznamu</li>
+<li><strong>Datum:</strong> Vyberte datum směny</li>
+<li><strong>Čas začátku:</strong> Např. 07:00</li>
+<li><strong>Čas konce:</strong> Např. 15:00</li>
+<li>
+<p><strong>Pracovníci:</strong> Zaškrtněte pracovníky, kteří budou na směně</p>
+</li>
+<li>
+<p><strong>Přidání úkolů:</strong></p>
+</li>
+<li>Klikněte na <strong>"+ Přidat úkol"</strong></li>
+<li>Vyplňte:<ul>
+<li><strong>Název úkolu:</strong> Např. "Betonáž základové desky"</li>
+<li><strong>Popis:</strong> Podrobný popis práce</li>
+<li><strong>Je prioritní:</strong> Zaškrtněte pro důležité úkoly</li>
+</ul>
+</li>
+<li>
+<p>Můžete přidat více úkolů opakováním</p>
+</li>
+<li>
+<p><strong>Instrukce pro pracovníky:</strong></p>
+</li>
+<li>Do pole "Instrukce pro pracovníky" napište obecné pokyny pro celou směnu</li>
+<li>
+<p>Např. "Nosit reflexní vesty, dodržovat BOZP"</p>
+</li>
+<li>
+<p>Klikněte <strong>"Vytvořit směnu"</strong></p>
+</li>
+</ol>
+<blockquote>
+<p><strong>Automatické notifikace:</strong> Všichni přiřazení pracovníci obdrží emailovou notifikaci s detaily směny, úkoly a instrukcemi.</p>
+</blockquote>
+<h3 id="detail-smeny">Detail směny</h3>
+<ol>
+<li>V seznamu směn klikněte na název projektu nebo datum</li>
+<li>Zobrazí se detail směny s:</li>
+<li>Kompletními informacemi o směně</li>
+<li>Seznam přiřazených pracovníků</li>
+<li>Seznam úkolů s možností označit jako hotové</li>
+<li>Historie změn</li>
+</ol>
+<h3 id="editace-smeny">Editace směny</h3>
+<ol>
+<li>V detailu směny klikněte na <strong>"Upravit"</strong></li>
+<li>Upravte potřebné údaje</li>
+<li>Můžete:</li>
+<li>Přidat/odebrat pracovníky</li>
+<li>Přidat/upravit/smazat úkoly</li>
+<li>Změnit čas nebo datum</li>
+<li>Klikněte <strong>"Uložit změny"</strong></li>
+</ol>
+<blockquote>
+<p><strong>Poznámka:</strong> Při změně údajů směny budou pracovníci upozorněni emailem.</p>
+</blockquote>
+<hr />
+<h2 id="mimoradne-prace">Mimořádné práce</h2>
+<p><em>Pro všechny role s různými oprávněními</em></p>
+<h3 id="co-jsou-mimoradne-prace">Co jsou mimořádné práce?</h3>
+<p>Mimořádné práce jsou neplánované úkoly mimo standard projekt, které vyžadují:
+- Extra náklady
+- Dodatečný materiál
+- Změnu plánu
+- Schválení manažerem</p>
+<h3 id="vytvoreni-mimoradne-prace">Vytvoření mimořádné práce</h3>
+<ol>
+<li>Klikněte na <strong>"Mimořádné práce"</strong> v menu</li>
+<li>Klikněte na <strong>"+ Nová mimořádná práce"</strong></li>
+<li>Vyplňte formulář:</li>
+<li><strong>Projekt:</strong> Vyberte projekt</li>
+<li><strong>Název:</strong> Stručný popis (např. "Dodatečné armování")</li>
+<li><strong>Popis:</strong> Podrobný popis práce a důvod</li>
+<li><strong>Datum provedení:</strong> Kdy byla práce provedena</li>
+<li><strong>Odhadované náklady:</strong> Částka v Kč</li>
+<li>
+<p><strong>Status:</strong> Čeká na schválení / Schváleno / Zamítnuto</p>
+</li>
+<li>
+<p><strong>Přidání fotek:</strong></p>
+</li>
+<li>Klikněte na <strong>"Nahrát fotky"</strong></li>
+<li>Vyberte jednu nebo více fotografií (jpg, png)</li>
+<li>Max. 5 MB na fotku</li>
+<li>
+<p>Fotky se zobrazí jako náhledy</p>
+</li>
+<li>
+<p>Klikněte <strong>"Uložit"</strong></p>
+</li>
+</ol>
+<blockquote>
+<p><strong>Workflow:</strong> Stavbyvedoucí vytvoří mimořádnou práci → Manažer schválí/zamítne → Admin může upravovat vše.</p>
+</blockquote>
+<h3 id="pridani-materialu-k-mimoradne-praci">Přidání materiálů k mimořádné práci</h3>
+<ol>
+<li>Otevřete detail mimořádné práce</li>
+<li>V sekci <strong>"Použité materiály"</strong> klikněte <strong>"+ Přidat materiály"</strong></li>
+<li>Vyberte materiály z ceníku:</li>
+<li>Zaškrtněte materiály</li>
+<li>Zadejte množství u každého materiálu</li>
+<li>Klikněte <strong>"Přidat vybrané materiály"</strong></li>
+</ol>
+<blockquote>
+<p><strong>Automatický výpočet:</strong> Systém automaticky vypočítá celkovou cenu podle množství a jednotkových cen.</p>
+</blockquote>
+<h3 id="schvalovani-mimoradnych-praci">Schvalování mimořádných prací</h3>
+<p><em>Pro manažery a administrátory</em></p>
+<ol>
+<li>V seznamu mimořádných prací najděte položky se stavem <strong>"Čeká na schválení"</strong></li>
+<li>Klikněte na detail</li>
+<li>Zkontrolujte:</li>
+<li>Popis práce</li>
+<li>Fotodokumentaci</li>
+<li>Použité materiály</li>
+<li>Celkové náklady</li>
+<li>Klikněte na:</li>
+<li><strong>"Schválit"</strong> - práce bude provedena</li>
+<li><strong>"Zamítnout"</strong> - práce nebude provedena</li>
+</ol>
+<h3 id="export-mimoradnych-praci">Export mimořádných prací</h3>
+<ol>
+<li>V seznamu mimořádných prací klikněte <strong>"Exportovat do PDF"</strong></li>
+<li>Vyberte:</li>
+<li>Projekt (nebo všechny projekty)</li>
+<li>Datum od - do</li>
+<li>Stáhne se PDF report s:</li>
+<li>Seznamem všech mimořádných prací</li>
+<li>Fotodokumentací</li>
+<li>Použitými materiály</li>
+<li>Celkovými náklady</li>
+</ol>
+<hr />
+<h2 id="sprava-materialu">Správa materiálů</h2>
+<p><em>Pro administrátory</em></p>
+<h3 id="zobrazeni-ceniku-materialu">Zobrazení ceníku materiálů</h3>
+<ol>
+<li>Klikněte na <strong>"Materiály"</strong> v menu</li>
+<li>Zobrazí se tabulka všech materiálů:</li>
+<li><strong>SKU:</strong> Jedinečný kód materiálu</li>
+<li><strong>Název:</strong> Název materiálu</li>
+<li><strong>Popis:</strong> Podrobný popis</li>
+<li><strong>Kategorie:</strong> Typ materiálu (Cement, Izolace, atd.)</li>
+<li><strong>Jednotková cena:</strong> Cena v Kč</li>
+<li><strong>Jednotka:</strong> ks, m³, m², kg</li>
+</ol>
+<h3 id="pridani-noveho-materialu">Přidání nového materiálu</h3>
+<ol>
+<li>Klikněte na <strong>"+ Nový materiál"</strong></li>
+<li>Vyplňte formulář:</li>
+<li><strong>Název:</strong> Např. "Cement portlandský 25kg"</li>
+<li><strong>SKU:</strong> Např. "CEM-001" (unikátní kód)</li>
+<li><strong>Popis:</strong> Podrobný popis materiálu</li>
+<li><strong>Kategorie:</strong> Vyberte nebo zadejte novou kategorii</li>
+<li><strong>Jednotková cena:</strong> Cena v Kč (např. 189)</li>
+<li><strong>Jednotka:</strong> Vyberte (ks, m³, m², kg, l, m)</li>
+<li>Klikněte <strong>"Vytvořit"</strong></li>
+</ol>
+<h3 id="editace-materialu">Editace materiálu</h3>
+<ol>
+<li>V ceníku klikněte na <strong>"Upravit"</strong> u materiálu</li>
+<li>Upravte potřebné údaje</li>
+<li>Klikněte <strong>"Uložit změny"</strong></li>
+</ol>
+<blockquote>
+<p><strong>Tip:</strong> Při změně ceny se historická data nezmění, nová cena platí pro nové mimořádné práce.</p>
+</blockquote>
+<h3 id="mazani-materialu">Mazání materiálu</h3>
+<ol>
+<li>V ceníku klikněte na <strong>"Smazat"</strong> u materiálu</li>
+<li>Potvrďte smazání</li>
+</ol>
+<blockquote>
+<p><strong>Varování:</strong> Nelze smazat materiál, který je použitý v některé mimořádné práci.</p>
+</blockquote>
+<hr />
+<h2 id="sprava-uzivatelu">Správa uživatelů</h2>
+<p><em>Pro administrátory</em></p>
+<h3 id="zobrazeni-seznamu-uzivatelu">Zobrazení seznamu uživatelů</h3>
+<ol>
+<li>Klikněte na <strong>"Uživatelé"</strong> v menu (v sekci Admin)</li>
+<li>Zobrazí se tabulka všech uživatelů:</li>
+<li><strong>Jméno a příjmení</strong></li>
+<li><strong>Email</strong></li>
+<li><strong>Telefon</strong></li>
+<li><strong>Role:</strong> Admin / Manager / Foreman / Worker</li>
+<li><strong>Stav:</strong> Aktivní / Neaktivní</li>
+</ol>
+<h3 id="vytvoreni-noveho-uzivatele">Vytvoření nového uživatele</h3>
+<ol>
+<li>Klikněte na <strong>"+ Nový uživatel"</strong></li>
+<li>Vyplňte formulář:</li>
+<li><strong>Email:</strong> Např. "novak@firma.cz"</li>
+<li><strong>Heslo:</strong> Dočasné heslo (doporučujeme aby si ho uživatel změnil)</li>
+<li><strong>Jméno:</strong> Křestní jméno</li>
+<li><strong>Příjmení:</strong> Příjmení</li>
+<li><strong>Telefon:</strong> Formát +420123456789</li>
+<li><strong>Role:</strong> Vyberte správnou roli</li>
+<li>Klikněte <strong>"Vytvořit"</strong></li>
+</ol>
+<blockquote>
+<p><strong>Poznámka:</strong> Nový uživatel obdrží přihlašovací údaje emailem.</p>
+</blockquote>
+<h3 id="editace-uzivatele">Editace uživatele</h3>
+<ol>
+<li>V seznamu klikněte na <strong>"Upravit"</strong> u uživatele</li>
+<li>Můžete změnit:</li>
+<li>Email</li>
+<li>Jméno a příjmení</li>
+<li>Telefon</li>
+<li>Roli</li>
+<li>Klikněte <strong>"Uložit změny"</strong></li>
+</ol>
+<blockquote>
+<p><strong>Varování:</strong> Změna role ovlivní přístupová práva uživatele.</p>
+</blockquote>
+<h3 id="aktivacedeaktivace-uzivatele">Aktivace/Deaktivace uživatele</h3>
+<ol>
+<li>V seznamu klikněte na:</li>
+<li><strong>"Deaktivovat"</strong> u aktivního uživatele</li>
+<li><strong>"Aktivovat"</strong> u neaktivního uživatele</li>
+</ol>
+<p><strong>Efekty deaktivace:</strong>
+- Uživatel se nemůže přihlásit
+- Nezobrazuje se ve výběrových seznamech
+- Historická data zůstávají zachována
+- Lze kdykoliv znovu aktivovat</p>
+<blockquote>
+<p><strong>Tip:</strong> Deaktivace je lepší než smazání, protože zachová historii.</p>
+</blockquote>
+<h3 id="reset-hesla">Reset hesla</h3>
+<ol>
+<li>V seznamu klikněte na <strong>"Upravit"</strong> u uživatele</li>
+<li>Klikněte na <strong>"Resetovat heslo"</strong></li>
+<li>Zadejte nové dočasné heslo</li>
+<li>Klikněte <strong>"Uložit"</strong></li>
+</ol>
+<blockquote>
+<p><strong>Doporučení:</strong> Informujte uživatele o novém heslu bezpečným způsobem.</p>
+</blockquote>
+<hr />
+<h2 id="notifikace">Notifikace</h2>
+<h3 id="typy-notifikaci">Typy notifikací</h3>
+<h4 id="emailove-notifikace">📧 Emailové notifikace</h4>
+<p>Systém automaticky odesílá emaily při:</p>
+<ol>
+<li><strong>Vytvoření směny:</strong></li>
+<li>Pracovníci obdrží email s detaily směny</li>
+<li>Obsahuje: Projekt, datum, čas, úkoly, instrukce</li>
+<li>
+<p>Link na detail směny v aplikaci</p>
+</li>
+<li>
+<p><strong>Změně směny:</strong></p>
+</li>
+<li>Pracovníci obdrží informaci o změně</li>
+<li>
+<p>Popis změn (čas, úkoly, atd.)</p>
+</li>
+<li>
+<p><strong>Vytvoření mimořádné práce:</strong></p>
+</li>
+<li>Manažeři obdrží notifikaci o nové práci ke schválení</li>
+<li>
+<p>Obsahuje: Název, popis, náklady, fotky</p>
+</li>
+<li>
+<p><strong>Schválení/Zamítnutí mimořádné práce:</strong></p>
+</li>
+<li>Stavbyvedoucí obdrží info o rozhodnutí manažera</li>
+</ol>
+<h4 id="notifikace-v-aplikaci">🔔 Notifikace v aplikaci</h4>
+<ol>
+<li>Klikněte na ikonu <strong>zvonečku</strong> v pravém horním rohu</li>
+<li>Zobrazí se seznam notifikací</li>
+<li>Kliknutím na notifikaci:</li>
+<li>Označí se jako přečtená</li>
+<li>Přesměruje na související stránku</li>
+</ol>
+<blockquote>
+<p><strong>Tip:</strong> Nepřečtené notifikace jsou zvýrazněné tučně.</p>
+</blockquote>
+<h3 id="nastaveni-notifikaci">Nastavení notifikací</h3>
+<p><em>Funkce bude dostupná v budoucí verzi</em></p>
+<hr />
+<h2 id="caste-problemy-a-reseni">Časté problémy a řešení</h2>
+<h3 id="nemohu-se-prihlasit">Nemohu se přihlásit</h3>
+<p><strong>Možné příčiny:</strong>
+1. Špatné heslo → Kontaktujte administrátora pro reset
+2. Neaktivní účet → Administrátor musí účet aktivovat
+3. Neplatný email → Zkontrolujte překlepy</p>
+<h3 id="nejsou-videt-vsichni-uzivatele-v-seznamech">Nejsou vidět všichni uživatelé v seznamech</h3>
+<p><strong>Důvod:</strong> Deaktivovaní uživatelé se nezobrazují v checkboxech a dropdownech.</p>
+<p><strong>Řešení:</strong> 
+- Admin musí uživatele aktivovat v sekci "Uživatelé"
+- Klikněte na "Aktivovat" u příslušného uživatele</p>
+<h3 id="nedorazil-email-s-notifikaci">Nedorazil email s notifikací</h3>
+<p><strong>Možné příčiny:</strong>
+1. Email je ve složce SPAM → Zkontrolujte spam
+2. Nesprávný email v profilu → Admin upraví email v sekci "Uživatelé"
+3. Problém s email službou → Kontaktujte technickou podporu</p>
+<h3 id="nevidim-fotky-u-mimoradne-prace">Nevidím fotky u mimořádné práce</h3>
+<p><strong>Možné příčiny:</strong>
+1. Fotky jsou příliš velké (max 5 MB) → Zmenšete fotky
+2. Nesprávný formát (pouze jpg, png) → Převeďte do správného formátu
+3. Pomalé připojení → Počkejte na načtení</p>
+<h3 id="cislo-projektu-se-neulozi">Číslo projektu se neuloží</h3>
+<p><strong>Důvod:</strong> Číslo projektu musí být unikátní.</p>
+<p><strong>Řešení:</strong> 
+- Zkontrolujte, zda stejné číslo již není použito
+- Zvolte jiné číslo projektu</p>
+<h3 id="nelze-smazat-material">Nelze smazat materiál</h3>
+<p><strong>Důvod:</strong> Materiál je použitý v některé mimořádné práci.</p>
+<p><strong>Řešení:</strong>
+- Deaktivujte materiál místo smazání
+- Nebo smažte všechny mimořádné práce používající tento materiál (nedoporučeno)</p>
+<h3 id="smena-se-neulozi-bez-ukolu">Směna se neuloží bez úkolů</h3>
+<p><strong>Důvod:</strong> Systém vyžaduje alespoň jeden úkol pro každou směnu.</p>
+<p><strong>Řešení:</strong>
+- Přidejte alespoň jeden úkol před uložením
+- Např. "Obecné stavební práce"</p>
+<hr />
+<h2 id="kontakt-a-technicka-podpora">Kontakt a technická podpora</h2>
+<p><strong>Email:</strong> pecholtmartin@gmail.com<br />
+<strong>Telefon:</strong> +420 123 456 789</p>
+<p><strong>GitHub repository:</strong> https://github.com/Pechy92/stavebniAplikace</p>
+<p><strong>Provozní doba podpory:</strong>
+- Po-Pá: 8:00 - 17:00
+- So-Ne: Pouze kritické problémy</p>
+<hr />
+<h2 id="verze-dokumentace">Verze dokumentace</h2>
+<p><strong>Verze:</strong> 1.0<br />
+<strong>Datum:</strong> 29. ledna 2026<br />
+<strong>Autor:</strong> Systémový tým</p>
+<hr />
+<h2 id="prehled-testovacich-uctu">Přehled testovacích účtů</h2>
+<h3 id="pro-email-pecholtmartingmailcom">Pro email: pecholtmartin@gmail.com</h3>
+<table>
+<thead>
+<tr>
+<th>Role</th>
+<th>Email</th>
+<th>Heslo</th>
+<th>Jméno</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Admin</td>
+<td>pecholtmartin+admin@gmail.com</td>
+<td>admin123</td>
+<td>Admin Systému</td>
+</tr>
+<tr>
+<td>Manager</td>
+<td>pecholtmartin+manager1@gmail.com</td>
+<td>manager123</td>
+<td>Martin Novák</td>
+</tr>
+<tr>
+<td>Manager</td>
+<td>pecholtmartin+manager2@gmail.com</td>
+<td>manager123</td>
+<td>Jana Svobodová</td>
+</tr>
+<tr>
+<td>Foreman</td>
+<td>pecholtmartin+foreman1@gmail.com</td>
+<td>foreman123</td>
+<td>Petr Dvořák</td>
+</tr>
+<tr>
+<td>Foreman</td>
+<td>pecholtmartin+foreman2@gmail.com</td>
+<td>foreman123</td>
+<td>Eva Procházková</td>
+</tr>
+<tr>
+<td>Worker</td>
+<td>pecholtmartin+worker1@gmail.com</td>
+<td>worker123</td>
+<td>Jan Veselý</td>
+</tr>
+<tr>
+<td>Worker</td>
+<td>pecholtmartin+worker2@gmail.com</td>
+<td>worker123</td>
+<td>Pavel Černý</td>
+</tr>
+<tr>
+<td>Worker</td>
+<td>pecholtmartin+worker3@gmail.com</td>
+<td>worker123</td>
+<td>Tomáš Bílý</td>
+</tr>
+<tr>
+<td>Worker</td>
+<td>pecholtmartin+worker4@gmail.com</td>
+<td>worker123</td>
+<td>Michal Zelený</td>
+</tr>
+<tr>
+<td>Worker</td>
+<td>pecholtmartin+worker5@gmail.com</td>
+<td>worker123</td>
+<td>Jakub Růžový</td>
+</tr>
+</tbody>
+</table>
+<h3 id="pro-email-pecholtmarekgmailcom">Pro email: pecholtmarek@gmail.com</h3>
+<table>
+<thead>
+<tr>
+<th>Role</th>
+<th>Email</th>
+<th>Heslo</th>
+<th>Jméno</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Admin</td>
+<td>pecholtmarek+admin@gmail.com</td>
+<td>admin123</td>
+<td>Marek Správce</td>
+</tr>
+<tr>
+<td>Manager</td>
+<td>pecholtmarek+manager1@gmail.com</td>
+<td>manager123</td>
+<td>Karel Manažer</td>
+</tr>
+<tr>
+<td>Manager</td>
+<td>pecholtmarek+manager2@gmail.com</td>
+<td>manager123</td>
+<td>Lucie Koordinátorka</td>
+</tr>
+<tr>
+<td>Foreman</td>
+<td>pecholtmarek+foreman1@gmail.com</td>
+<td>foreman123</td>
+<td>Josef Stavbyvedoucí</td>
+</tr>
+<tr>
+<td>Foreman</td>
+<td>pecholtmarek+foreman2@gmail.com</td>
+<td>foreman123</td>
+<td>Alena Mistrová</td>
+</tr>
+<tr>
+<td>Worker</td>
+<td>pecholtmarek+worker1@gmail.com</td>
+<td>worker123</td>
+<td>David Pracovník</td>
+</tr>
+<tr>
+<td>Worker</td>
+<td>pecholtmarek+worker2@gmail.com</td>
+<td>worker123</td>
+<td>Marek Dělník</td>
+</tr>
+<tr>
+<td>Worker</td>
+<td>pecholtmarek+worker3@gmail.com</td>
+<td>worker123</td>
+<td>Petr Zedník</td>
+</tr>
+<tr>
+<td>Worker</td>
+<td>pecholtmarek+worker4@gmail.com</td>
+<td>worker123</td>
+<td>Lukáš Pomocník</td>
+</tr>
+<tr>
+<td>Worker</td>
+<td>pecholtmarek+worker5@gmail.com</td>
+<td>worker123</td>
+<td>Vojtěch Řemeslník</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Poznámka:</strong> Díky Gmail +alias funkci všechny emaily pro pecholtmartin+xxx@gmail.com přijdou na pecholtmartin@gmail.com a všechny emaily pro pecholtmarek+xxx@gmail.com přijdou na pecholtmarek@gmail.com.</p>
+</blockquote>
+</body>
+</html>
