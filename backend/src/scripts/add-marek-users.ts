@@ -82,7 +82,7 @@ async function addMarekUsers() {
          id`
     );
 
-    users.forEach(user => {
+    (users as any[]).forEach((user: any) => {
       const password = 
         user.role === 'admin' ? 'admin123' :
         user.role === 'manager' ? 'manager123' :
@@ -92,7 +92,7 @@ async function addMarekUsers() {
 
     console.log('\n✨ Všichni uživatelé úspěšně vytvořeni!');
 
-  } catch (error) {
+  } catch (error: any) {
     if (error.code === 'ER_DUP_ENTRY') {
       console.error('❌ Chyba: Uživatelé již existují');
     } else {
