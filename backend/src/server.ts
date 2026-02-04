@@ -15,11 +15,13 @@ import adminRoutes from './routes/adminRoutes';
 import { errorHandler } from './middleware/errorHandler';
 import { createTables } from './config/initDatabase';
 import { addWorkerInstructions } from './migrations/add-worker-instructions';
+import { addCloudinaryColumns } from './migrations/add-cloudinary-columns';
 
 dotenv.config();
 
 // Spustit migrace při startu
 addWorkerInstructions().catch(console.error);
+addCloudinaryColumns().catch(console.error);
 
 const app = express();
 const PORT = process.env.PORT || 3001;

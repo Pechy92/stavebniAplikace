@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import pool from '../config/database';
 import { AuthRequest } from '../middleware/auth';
+import { uploadToCloudinary } from '../utils/cloudinaryHelper';
 import { sendEmail, getExtraWorkStatusChangeTemplate } from '../services/emailService';
 
 export const createExtraWork = async (req: AuthRequest, res: Response) => {
@@ -38,18 +39,25 @@ export const createExtraWork = async (req: AuthRequest, res: Response) => {
 
     console.log('✅ Extra work created with ID:', extraWorkId);
 
-    // Přidat fotografie pokud existují
+    // Přidat fotografie pokud existují - nahrát do Cloudinary
     if (req.files && Array.isArray(req.files)) {
-      console.log('📸 Processing', req.files.length, 'photos');
+      console.log('📸 Processing', req.files.length, 'photos for Cloudinary upload');
+      
       for (const file of req.files) {
-        // Uložit cestu relativně k /uploads/
-        const filePath = '/uploads/' + file.filename;
-        console.log('📸 Saving photo path:', filePath);
-        await connection.query(
-          `INSERT INTO extra_work_photos (extra_work_id, file_path, file_name, file_size, mime_type, uploaded_by)
-           VALUES (?, ?, ?, ?, ?, ?)`,
-          [extraWorkId, filePath, file.originalname, file.size, file.mimetype, workerId]
-        );
+        try {
+          // Upload do Cloudinary
+          const result = await uploadToCloudinary(file.buffer, 'extra-work');
+          
+          console.log('📸 Saving Cloudinary photo:', result.secure_url);
+          await connection.query(
+            `INSERT INTO extra_work_photos (extra_work_id, file_path, file_name, file_size, mime_type, uploaded_by, cloudinary_id)
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [extraWorkId, result.secure_url, file.originalname, file.size, file.mimetype, workerId, result.public_id]
+          );
+        } catch (uploadError) {
+          console.error('❌ Failed to upload photo to Cloudinary:', uploadError);
+          // Pokračujeme i když se nepodaří nahrát fotku
+        }
       }
     } else {
       console.log('📸 No photos to process');

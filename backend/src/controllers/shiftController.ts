@@ -3,10 +3,7 @@ import pool from '../config/database';
 import { RowDataPacket, ResultSetHeader } from 'mysql2';
 import { AuthRequest } from '../middleware/auth';
 import { sendEmail, getShiftAssignmentTemplate } from '../services/emailService';
-import path from 'path';
-import fs from 'fs';
-
-const UPLOADS_DIR = path.join(process.cwd(), 'uploads', 'shifts');
+import { uploadToCloudinary } from '../utils/cloudinaryHelper';
 
 export const getAllShifts = async (req: AuthRequest, res: Response) => {
   try {
@@ -301,38 +298,32 @@ export const uploadShiftPhotos = async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ message: 'Směna nenalezena' });
     }
 
-    // Vytvořit uploads složku pokud neexistuje
-    if (!fs.existsSync(UPLOADS_DIR)) {
-      fs.mkdirSync(UPLOADS_DIR, { recursive: true });
-    }
-
     const uploadedPhotos = [];
 
+    // Upload fotek do Cloudinary
     for (const file of files) {
-      const fileName = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}-${file.originalname}`;
-      const filePath = path.join(UPLOADS_DIR, fileName);
+      try {
+        const result = await uploadToCloudinary(file.buffer, 'shifts');
 
-      // Přesunout soubor do uploads složky
-      fs.copyFileSync(file.path, filePath);
-      fs.unlinkSync(file.path);
+        const [dbResult] = await pool.query<ResultSetHeader>(
+          `INSERT INTO shift_photos (shift_id, file_path, file_name, file_size, worker_id, cloudinary_id) 
+           VALUES (?, ?, ?, ?, ?, ?)`,
+          [shiftId, result.secure_url, file.originalname, file.size, req.user!.id, result.public_id]
+        );
 
-      const dbFilePath = `/uploads/shifts/${fileName}`;
-
-      const [result] = await pool.query<ResultSetHeader>(
-        `INSERT INTO shift_photos (shift_id, file_path, file_name, file_size, worker_id) 
-         VALUES (?, ?, ?, ?, ?)`,
-        [shiftId, dbFilePath, file.originalname, file.size, req.user!.id]
-      );
-
-      uploadedPhotos.push({
-        id: result.insertId,
-        shift_id: shiftId,
-        file_path: dbFilePath,
-        file_name: file.originalname,
-        file_size: file.size,
-        uploaded_by_name: req.user!.first_name,
-        created_at: new Date().toISOString()
-      });
+        uploadedPhotos.push({
+          id: dbResult.insertId,
+          shift_id: shiftId,
+          file_path: result.secure_url,
+          file_name: file.originalname,
+          file_size: file.size,
+          uploaded_by_name: req.user!.first_name,
+          created_at: new Date().toISOString()
+        });
+      } catch (uploadError) {
+        console.error('❌ Failed to upload photo to Cloudinary:', uploadError);
+        // Pokračujeme i když se nepodaří nahrát fotku
+      }
     }
 
     res.status(201).json({
