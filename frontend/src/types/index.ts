@@ -66,6 +66,7 @@ export interface ExtraWork {
   project_id?: number;
   project_name?: string;
   created_at?: string;
+  created_by?: number;
   created_by_first_name?: string;
   created_by_last_name?: string;
   description?: string;
