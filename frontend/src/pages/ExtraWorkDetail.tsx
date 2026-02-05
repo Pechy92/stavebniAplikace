@@ -276,25 +276,32 @@ const ExtraWorkDetail: React.FC = () => {
           {/* Fotografie */}
           {extraWork.photos && extraWork.photos.length > 0 && (
             <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Fotografie</h3>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Fotografie</h3>
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-                {extraWork.photos.map((photo: any, index: number) => (
-                  <div key={photo.id || index} className="relative aspect-square group">
-                    <img
-                      src={`${API_BASE_URL}${photo.file_path}`}
-                      alt={photo.file_name || `Fotografie ${index + 1}`}
-                      className="w-full h-full object-cover rounded-lg cursor-pointer hover:opacity-90 transition"
-                      onClick={() => window.open(`${API_BASE_URL}${photo.file_path}`, '_blank')}
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Crect fill="%23f0f0f0" width="100" height="100"/%3E%3Ctext fill="%23999" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3EObrazek nenalezen%3C/text%3E%3C/svg%3E';
-                      }}
-                    />
-                    <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-2 rounded-b-lg opacity-0 group-hover:opacity-100 transition">
-                      {photo.file_name || `Fotografie ${index + 1}`}
+                {extraWork.photos.map((photo: any, index: number) => {
+                  // Pokud je file_path Cloudinary URL (začíná http), použij ji přímo
+                  const photoUrl = photo.file_path.startsWith('http') 
+                    ? photo.file_path 
+                    : `${API_BASE_URL}${photo.file_path}`;
+                  
+                  return (
+                    <div key={photo.id || index} className="relative aspect-square group">
+                      <img
+                        src={photoUrl}
+                        alt={photo.file_name || `Fotografie ${index + 1}`}
+                        className="w-full h-full object-cover rounded-lg cursor-pointer hover:opacity-90 transition"
+                        onClick={() => window.open(photoUrl, '_blank')}
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Crect fill="%23f0f0f0" width="100" height="100"/%3E%3Ctext fill="%23999" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3EObrazek nenalezen%3C/text%3E%3C/svg%3E';
+                        }}
+                      />
+                      <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-2 rounded-b-lg opacity-0 group-hover:opacity-100 transition">
+                        {photo.file_name || `Fotografie ${index + 1}`}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}

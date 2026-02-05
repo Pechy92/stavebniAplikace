@@ -351,24 +351,31 @@ const ShiftDetail: React.FC = () => {
               Nahrané fotografie ({photos.length})
             </h3>
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-              {photos.map((photo) => (
-                <div key={photo.id} className="relative">
-                  <img
-                    src={`${API_BASE_URL}${photo.file_path}`}
-                    alt="Shift photo"
-                    className="w-full h-24 object-cover rounded-lg"
-                  />
-                  <button
-                    onClick={() => handleDeletePhoto(photo.id)}
-                    className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold"
-                  >
-                    ×
-                  </button>
-                  <p className="text-xs text-gray-600 mt-1">
-                    {new Date(photo.created_at).toLocaleDateString('cs-CZ')}
-                  </p>
-                </div>
-              ))}
+              {photos.map((photo) => {
+                // Pokud je file_path Cloudinary URL (začíná http), použij ji přímo
+                const photoUrl = photo.file_path.startsWith('http') 
+                  ? photo.file_path 
+                  : `${API_BASE_URL}${photo.file_path}`;
+                
+                return (
+                  <div key={photo.id} className="relative">
+                    <img
+                      src={photoUrl}
+                      alt="Shift photo"
+                      className="w-full h-24 object-cover rounded-lg"
+                    />
+                    <button
+                      onClick={() => handleDeletePhoto(photo.id)}
+                      className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold"
+                    >
+                      ×
+                    </button>
+                    <p className="text-xs text-gray-600 mt-1">
+                      {new Date(photo.created_at).toLocaleDateString('cs-CZ')}
+                    </p>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
