@@ -22,6 +22,8 @@ const ShiftsList: React.FC = () => {
   const { t } = useTranslation();
   const [shifts, setShifts] = useState<Shift[]>([]);
   const [loading, setLoading] = useState(true);
+  const [projects, setProjects] = useState<Array<{ id: number; name: string; custom_id: string }>>([]);
+  const [users, setUsers] = useState<Array<{ id: number; first_name: string; last_name: string }>>([]);
   const [filters, setFilters] = useState({
     dateFrom: '',
     dateTo: '',
@@ -31,6 +33,8 @@ const ShiftsList: React.FC = () => {
 
   useEffect(() => {
     loadShifts();
+    loadProjects();
+    loadUsers();
   }, []);
 
   const loadShifts = async () => {
@@ -44,6 +48,30 @@ const ShiftsList: React.FC = () => {
       console.error('Chyba při načítání směn:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadProjects = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API_URL}/projects`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setProjects(response.data);
+    } catch (error) {
+      console.error('Chyba při načítání projektů:', error);
+    }
+  };
+
+  const loadUsers = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API_URL}/users`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setUsers(response.data);
+    } catch (error) {
+      console.error('Chyba při načítání uživatelů:', error);
     }
   };
 
@@ -114,35 +142,71 @@ const ShiftsList: React.FC = () => {
 
       {/* Filtry */}
       <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4 mb-6">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <div>
-            <label htmlFor="dateFrom" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="dateFrom" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               {t('shifts.dateFrom')}
             </label>
             <input
               type="date"
               id="dateFrom"
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+              className="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
               value={filters.dateFrom}
               onChange={(e) => setFilters({ ...filters, dateFrom: e.target.value })}
             />
           </div>
           <div>
-            <label htmlFor="dateTo" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="dateTo" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               {t('shifts.dateTo')}
             </label>
             <input
               type="date"
               id="dateTo"
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+              className="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
               value={filters.dateTo}
               onChange={(e) => setFilters({ ...filters, dateTo: e.target.value })}
             />
           </div>
-          <div className="sm:col-span-2 flex items-end">
+          <div>
+            <label htmlFor="projectId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              {t('dashboard.project')}
+            </label>
+            <select
+              id="projectId"
+              className="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+              value={filters.projectId}
+              onChange={(e) => setFilters({ ...filters, projectId: e.target.value })}
+            >
+              <option value="">{t('common.all')}</option>
+              {projects.map(project => (
+                <option key={project.id} value={project.id}>
+                  {project.custom_id} - {project.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="userId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              {t('shifts.worker')}
+            </label>
+            <select
+              id="userId"
+              className="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+              value={filters.userId}
+              onChange={(e) => setFilters({ ...filters, userId: e.target.value })}
+            >
+              <option value="">{t('common.all')}</option>
+              {users.map(user => (
+                <option key={user.id} value={user.id}>
+                  {user.first_name} {user.last_name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex items-end">
             <button
               onClick={() => setFilters({ dateFrom: '', dateTo: '', projectId: '', userId: '' })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 dark:bg-gray-700"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
             >
               {t('shifts.clearFilters')}
             </button>

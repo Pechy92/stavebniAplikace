@@ -11,16 +11,56 @@ const ExtraWorkList: React.FC = () => {
   const { t } = useTranslation();
   const [translatedExtraWorks, setTranslatedExtraWorks] = useState<ExtraWork[]>([]);
   const [loading, setLoading] = useState(true);
+  const [projects, setProjects] = useState<Array<{ id: number; name: string; custom_id: string }>>([]);
+  const [users, setUsers] = useState<Array<{ id: number; first_name: string; last_name: string }>>([]);
   const canCreate = user?.role === 'worker';
   const [filters, setFilters] = useState({
     status: '',
     projectId: '',
+    authorId: '',
     search: ''
   });
 
   useEffect(() => {
     loadExtraWorks();
   }, [filters]);
+
+  useEffect(() => {
+    loadProjects();
+    loadUsers();
+  }, []);
+
+  const loadProjects = async () => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/projects`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setProjects(data);
+      }
+    } catch (error) {
+      console.error('Chyba při načítání projektů:', error);
+    }
+  };
+
+  const loadUsers = async () => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setUsers(data);
+      }
+    } catch (error) {
+      console.error('Chyba při načítání uživatelů:', error);
+    }
+  };
 
   const loadExtraWorks = async () => {
     try {
@@ -34,6 +74,9 @@ const ExtraWorkList: React.FC = () => {
       }
       if (filters.projectId) {
         filtered = filtered.filter((ew: ExtraWork) => ew.project_id === parseInt(filters.projectId));
+      }
+      if (filters.authorId) {
+        filtered = filtered.filter((ew: ExtraWork) => ew.created_by === parseInt(filters.authorId));
       }
       if (filters.search) {
         const searchLower = filters.search.toLowerCase();
@@ -120,31 +163,31 @@ const ExtraWorkList: React.FC = () => {
 
       {/* Filtry */}
       <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4 mb-6">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <div>
-            <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="search" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               {t('common.search')}
             </label>
             <input
               type="text"
               id="search"
               placeholder={`${t('extraWork.description')} nebo ${t('extraWork.customId')}...`}
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+              className="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
               value={filters.search}
               onChange={(e) => setFilters({ ...filters, search: e.target.value })}
             />
           </div>
           <div>
-            <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="status" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               {t('extraWork.status')}
             </label>
             <select
               id="status"
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+              className="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
               value={filters.status}
               onChange={(e) => setFilters({ ...filters, status: e.target.value })}
             >
-              <option value="">{t('common.filter')} - {t('extraWork.status')}</option>
+              <option value="">{t('common.all')}</option>
               <option value="draft">{t('extraWork.statuses.draft')}</option>
               <option value="submitted_to_foreman">{t('extraWork.statuses.submitted_to_foreman')}</option>
               <option value="returned_to_worker">{t('extraWork.statuses.returned_to_worker')}</option>
@@ -153,10 +196,46 @@ const ExtraWorkList: React.FC = () => {
               <option value="approved">{t('extraWork.statuses.approved')}</option>
             </select>
           </div>
+          <div>
+            <label htmlFor="projectId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              {t('dashboard.project')}
+            </label>
+            <select
+              id="projectId"
+              className="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+              value={filters.projectId}
+              onChange={(e) => setFilters({ ...filters, projectId: e.target.value })}
+            >
+              <option value="">{t('common.all')}</option>
+              {projects.map(project => (
+                <option key={project.id} value={project.id}>
+                  {project.custom_id} - {project.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="authorId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              {t('extraWork.author')}
+            </label>
+            <select
+              id="authorId"
+              className="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+              value={filters.authorId}
+              onChange={(e) => setFilters({ ...filters, authorId: e.target.value })}
+            >
+              <option value="">{t('common.all')}</option>
+              {users.map(user => (
+                <option key={user.id} value={user.id}>
+                  {user.first_name} {user.last_name}
+                </option>
+              ))}
+            </select>
+          </div>
           <div className="flex items-end">
             <button
-              onClick={() => setFilters({ status: '', projectId: '', search: '' })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 dark:bg-gray-700"
+              onClick={() => setFilters({ status: '', projectId: '', authorId: '', search: '' })}
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
             >
               {t('shifts.clearFilters')}
             </button>
