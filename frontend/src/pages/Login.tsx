@@ -32,10 +32,10 @@ const Login: React.FC = () => {
       <div className="max-w-md w-full space-y-8">
         <div>
           <div className="flex justify-center mb-4">
-            <img src="/cmpe-logo.png" alt="CMPE" className="h-16" />
+            <img src="/cmpe_logo.jpg" alt="CMPE" className="h-20" />
           </div>
-          <h2 className="mt-2 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
-            CMPE STAVBY
+          <h2 className="mt-2 text-center text-2xl font-extrabold text-gray-900 dark:text-white">
+            STAVBY
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
             Přihlaste se do svého účtu
