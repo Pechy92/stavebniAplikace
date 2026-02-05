@@ -362,7 +362,7 @@ export const deleteShiftPhoto = async (req: AuthRequest, res: Response) => {
     const photoId = parseInt(req.params.photoId);
 
     const [photos] = await pool.query<RowDataPacket[]>(
-      'SELECT file_path FROM shift_photos WHERE id = ? AND shift_id = ?',
+      'SELECT file_path, cloudinary_id FROM shift_photos WHERE id = ? AND shift_id = ?',
       [photoId, shiftId]
     );
 
@@ -370,12 +370,17 @@ export const deleteShiftPhoto = async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ message: 'Fotografie nenalezena' });
     }
 
-    const filePath = photos[0].file_path;
-    const fullPath = path.join(process.cwd(), 'uploads/shifts', path.basename(filePath));
-
-    // Smazat soubor pokud existuje
-    if (fs.existsSync(fullPath)) {
-      fs.unlinkSync(fullPath);
+    // Smazat z Cloudinary pokud má cloudinary_id
+    const cloudinaryId = photos[0].cloudinary_id;
+    if (cloudinaryId) {
+      try {
+        const { deleteFromCloudinary, getPublicIdFromUrl } = await import('../utils/cloudinaryHelper');
+        await deleteFromCloudinary(cloudinaryId);
+        console.log('✅ Photo deleted from Cloudinary:', cloudinaryId);
+      } catch (cloudinaryError) {
+        console.error('⚠️ Failed to delete from Cloudinary:', cloudinaryError);
+        // Pokračujeme i když se nepodaří smazat z Cloudinary
+      }
     }
 
     // Smazat záznam z databáze
