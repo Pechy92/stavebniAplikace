@@ -32,7 +32,13 @@ const removeDiacritics = (text: string): string => {
 const loadImageAsBase64 = async (url: string): Promise<{ data: string; width: number; height: number } | null> => {
   return new Promise((resolve) => {
     const img = new Image();
-    img.crossOrigin = 'Anonymous';
+    
+    // Pro Cloudinary URL nepoužíváme crossOrigin, protože Cloudinary má CORS povolený
+    // Pro lokální URL ho nastavíme
+    if (!url.startsWith('https://res.cloudinary.com')) {
+      img.crossOrigin = 'Anonymous';
+    }
+    
     img.onload = () => {
       const canvas = document.createElement('canvas');
       canvas.width = img.width;
@@ -233,10 +239,17 @@ export const generateExtraWorkPDF = async (extraWork: ExtraWork): Promise<void> 
       }
 
       try {
-        const apiUrl = import.meta.env.MODE === 'production'
-          ? 'https://stavebniaplikacebackend-production.up.railway.app'
-          : 'http://localhost:3001';
-        const imageUrl = `${apiUrl}${photo.file_path}`;
+        // Pokud je file_path Cloudinary URL (začíná http), použij ji přímo
+        let imageUrl: string;
+        if (photo.file_path.startsWith('http')) {
+          imageUrl = photo.file_path;
+        } else {
+          const apiUrl = import.meta.env.MODE === 'production'
+            ? 'https://stavebniaplikacebackend-production.up.railway.app'
+            : 'http://localhost:3001';
+          imageUrl = `${apiUrl}${photo.file_path}`;
+        }
+        
         const imageData = await loadImageAsBase64(imageUrl);
         
         if (imageData) {
