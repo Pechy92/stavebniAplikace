@@ -32,27 +32,34 @@ const removeDiacritics = (text: string): string => {
 const loadImageAsBase64 = async (url: string): Promise<{ data: string; width: number; height: number } | null> => {
   return new Promise((resolve) => {
     const img = new Image();
-    
-    // Pro Cloudinary URL nepoužíváme crossOrigin, protože Cloudinary má CORS povolený
-    // Pro lokální URL ho nastavíme
-    if (!url.startsWith('https://res.cloudinary.com')) {
-      img.crossOrigin = 'Anonymous';
-    }
+    // CORS musí být vždy nastaveno pro canvas.toDataURL()
+    img.crossOrigin = 'anonymous';
     
     img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext('2d');
-      ctx?.drawImage(img, 0, 0);
-      resolve({
-        data: canvas.toDataURL('image/jpeg'),
-        width: img.width,
-        height: img.height
-      });
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          console.error('Nepodařilo se získat canvas context');
+          resolve(null);
+          return;
+        }
+        ctx.drawImage(img, 0, 0);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        resolve({
+          data: dataUrl,
+          width: img.width,
+          height: img.height
+        });
+      } catch (error) {
+        console.error('Chyba při konverzi obrázku na base64:', error);
+        resolve(null);
+      }
     };
-    img.onerror = () => {
-      console.error('Chyba při načítání obrázku:', url);
+    img.onerror = (error) => {
+      console.error('Chyba při načítání obrázku:', url, error);
       resolve(null);
     };
     img.src = url;
