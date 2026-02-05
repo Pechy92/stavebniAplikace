@@ -169,7 +169,7 @@ const ShiftsList: React.FC = () => {
           </div>
           <div>
             <label htmlFor="projectId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              {t('dashboard.project')}
+              {t('shifts.project')}
             </label>
             <select
               id="projectId"
@@ -177,7 +177,7 @@ const ShiftsList: React.FC = () => {
               value={filters.projectId}
               onChange={(e) => setFilters({ ...filters, projectId: e.target.value })}
             >
-              <option value="">{t('common.all')}</option>
+              <option value="">{t('common.allProjects')}</option>
               {projects.map(project => (
                 <option key={project.id} value={project.id}>
                   {project.custom_id} - {project.name}
@@ -195,7 +195,7 @@ const ShiftsList: React.FC = () => {
               value={filters.userId}
               onChange={(e) => setFilters({ ...filters, userId: e.target.value })}
             >
-              <option value="">{t('common.all')}</option>
+              <option value="">{t('common.allWorkers')}</option>
               {users.map(user => (
                 <option key={user.id} value={user.id}>
                   {user.first_name} {user.last_name}

@@ -15,7 +15,10 @@
     "yes": "Ano",
     "no": "Ne",
     "confirm": "Potvrdit",
-    "add": "Přidat"
+    "add": "Přidat",
+    "all": "Všechny",
+    "allProjects": "Všechny projekty",
+    "allWorkers": "Všichni pracovníci"
   },
   "nav": {
     "dashboard": "Přehled",
@@ -64,6 +67,7 @@
     "updateShift": "Aktualizovat směnu",
     "deleteShift": "Smazat směnu",
     "project": "Projekt",
+    "worker": "Pracovník",
     "workers": "Pracovníci",
     "date": "Datum",
     "startTime": "Začátek",
@@ -127,6 +131,7 @@
     "customId": "Číslo",
     "description": "Popis",
     "status": "Stav",
+    "author": "Autor vícepráce",
     "createdBy": "Vytvořil",
     "createdAt": "Vytvořeno",
     "materials": "Materiály",
