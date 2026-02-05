@@ -40,8 +40,9 @@ const Layout: React.FC = () => {
           <div className="flex justify-between h-16">
             <div className="flex">
               <div className="flex-shrink-0 flex items-center">
-                <Link to="/dashboard" className="text-xl font-bold text-primary">
-                  Stavební aplikace
+                <Link to="/dashboard" className="flex items-center gap-2">
+                  <img src="/cmpe-logo.png" alt="CMPE" className="h-8" />
+                  <span className="text-xl font-bold text-primary">CMPE STAVBY</span>
                 </Link>
               </div>
               <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
