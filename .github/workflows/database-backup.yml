@@ -27,12 +27,34 @@ jobs:
           DB_PASSWORD: ${{ secrets.RAILWAY_DB_PASSWORD }}
           DB_NAME: ${{ secrets.RAILWAY_DB_NAME }}
         run: |
+          # Check if secrets are configured
+          if [ -z "$DB_HOST" ] || [ -z "$DB_USER" ] || [ -z "$DB_PASSWORD" ] || [ -z "$DB_NAME" ]; then
+            echo "❌ ERROR: Railway database secrets are not configured!"
+            echo "Please add the following secrets to your GitHub repository:"
+            echo "  - RAILWAY_DB_HOST"
+            echo "  - RAILWAY_DB_PORT"
+            echo "  - RAILWAY_DB_USER"
+            echo "  - RAILWAY_DB_PASSWORD"
+            echo "  - RAILWAY_DB_NAME"
+            echo ""
+            echo "Go to: https://github.com/${{ github.repository }}/settings/secrets/actions"
+            exit 1
+          fi
+          
           BACKUP_FILE="backup_$(date +%Y%m%d_%H%M%S).sql"
-          mysqldump -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} -p${DB_PASSWORD} ${DB_NAME} > ${BACKUP_FILE}
+          echo "Creating backup: ${BACKUP_FILE}"
+          
+          mysqldump -h "${DB_HOST}" -P "${DB_PORT}" -u "${DB_USER}" -p"${DB_PASSWORD}" "${DB_NAME}" > "${BACKUP_FILE}"
+          
+          if [ $? -ne 0 ]; then
+            echo "❌ mysqldump failed!"
+            exit 1
+          fi
           
           # Komprese
-          gzip ${BACKUP_FILE}
+          gzip "${BACKUP_FILE}"
           
+          echo "✅ Backup created: ${BACKUP_FILE}.gz"
           echo "BACKUP_FILE=${BACKUP_FILE}.gz" >> $GITHUB_ENV
       
       - name: Upload to GitHub Artifacts
