@@ -9,9 +9,12 @@ export const getAllMaterials = async (req: AuthRequest, res: Response) => {
     const params: any[] = [];
 
     // Pokud je zadaný projekt, vrať globální + projektové materiály.
+    // Jinak vrať jenom globální materiály (project_id IS NULL)
     if (projectId) {
       query += ' AND (project_id IS NULL OR project_id = ?)';
       params.push(projectId);
+    } else {
+      query += ' AND project_id IS NULL';
     }
 
     if (search) {
