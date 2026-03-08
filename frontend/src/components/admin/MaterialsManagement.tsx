@@ -23,6 +23,7 @@ const MaterialsManagement: React.FC = () => {
   const [materials, setMaterials] = useState<Material[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [editingMaterial, setEditingMaterial] = useState<Material | null>(null);
   const [selectedProjectId, setSelectedProjectId] = useState<string>('');
@@ -37,6 +38,8 @@ const MaterialsManagement: React.FC = () => {
   });
 
   useEffect(() => {
+    setLoading(true);
+    setError(null);
     loadProjects();
   }, []);
 
@@ -50,24 +53,32 @@ const MaterialsManagement: React.FC = () => {
       const response = await axios.get(`${API_URL}/projects`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setProjects(response.data);
-    } catch (error) {
+      setProjects(response.data || []);
+      setError(null);
+    } catch (error: any) {
       console.error('Chyba při načítání projektů:', error);
+      setError(`Chyba při načítání projektů: ${error.message}`);
+      setProjects([]);
+    } finally {
+      setLoading(false);
     }
   };
 
   const loadMaterials = async () => {
     try {
       setLoading(true);
+      setError(null);
       const token = localStorage.getItem('token');
       const params = selectedProjectId ? { projectId: selectedProjectId } : {};
       const response = await axios.get(`${API_URL}/materials`, {
         headers: { Authorization: `Bearer ${token}` },
         params
       });
-      setMaterials(response.data);
-    } catch (error) {
+      setMaterials(response.data || []);
+    } catch (error: any) {
       console.error('Chyba při načítání materiálů:', error);
+      setError(`Chyba při načítání materiálů: ${error.message}`);
+      setMaterials([]);
     } finally {
       setLoading(false);
     }
@@ -171,6 +182,25 @@ const MaterialsManagement: React.FC = () => {
           <div className="w-5 h-5 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
           <span className="text-gray-700 dark:text-gray-300 font-medium">Načítám materiály...</span>
         </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="glass-card p-6 bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800">
+        <h3 className="text-xl font-bold text-red-700 dark:text-red-400 mb-2">❌ Chyba</h3>
+        <p className="text-red-600 dark:text-red-300 mb-4">{error}</p>
+        <button
+          onClick={() => {
+            setError(null);
+            loadProjects();
+            loadMaterials();
+          }}
+          className="btn-primary"
+        >
+          Zkusit znovu
+        </button>
       </div>
     );
   }
