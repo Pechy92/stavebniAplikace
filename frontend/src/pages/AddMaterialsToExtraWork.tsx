@@ -122,23 +122,27 @@ const AddMaterialsToExtraWork: React.FC = () => {
   return (
     <div>
       <div className="mb-6">
-        <Link to={`/extra-work/${id}`} className="text-primary hover:text-primary-dark text-sm font-medium">
+        <Link to={`/extra-work/${id}`} className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 text-sm font-medium inline-flex items-center gap-2 transition-colors">
           ← Zpět na detail vícepráce
         </Link>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
-        <div className="px-6 py-5 border-b border-gray-200">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Přidat materiály</h1>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Vícepráce: {extraWork.custom_id} - {extraWork.name}
+      <div className="glass-card animate-slide-up">
+        <div className="px-6 py-5 border-b border-gray-200/50 dark:border-gray-700/50 bg-gradient-to-r from-primary-500/10 to-purple-500/10">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+            📦 Přidat materiály
+          </h1>
+          <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
+            Vícepráce: <span className="font-semibold">{extraWork.custom_id}</span> - {extraWork.name}
           </p>
         </div>
 
         {extraWork.material_description_text && (
-          <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
-            <h3 className="text-sm font-medium text-gray-700 mb-2">Popis materiálů od dělníka:</h3>
-            <p className="text-sm text-gray-900 whitespace-pre-line">{extraWork.material_description_text}</p>
+          <div className="px-6 py-4 bg-blue-50/50 dark:bg-blue-900/10 border-b border-gray-200/50 dark:border-gray-700/50">
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+              💬 Popis materiálů od dělníka:
+            </h3>
+            <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line">{extraWork.material_description_text}</p>
           </div>
         )}
 
@@ -152,12 +156,12 @@ const AddMaterialsToExtraWork: React.FC = () => {
                 <button
                   type="button"
                   onClick={addMaterial}
-                  className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-primary bg-primary-light hover:bg-primary-light-dark"
+                  className="btn-secondary inline-flex items-center gap-2 group"
                 >
-                  <svg className="-ml-0.5 mr-1 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <svg className="w-4 h-4 group-hover:scale-110 transition-transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
                   </svg>
-                  Přidat materiál
+                  ➕ Přidat materiál
                 </button>
               </div>
 
@@ -166,9 +170,9 @@ const AddMaterialsToExtraWork: React.FC = () => {
               ) : (
                 <div className="space-y-3">
                   {selectedMaterials.map((material, index) => (
-                    <div key={index} className="flex items-center space-x-3">
+                    <div key={index} className="flex items-center space-x-3 glass-card p-3 animate-scale-in">
                       <select
-                        className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+                        className="input-glass flex-1"
                         value={material.materialId}
                         onChange={(e) => updateMaterial(index, 'materialId', parseInt(e.target.value))}
                         required
@@ -185,7 +189,7 @@ const AddMaterialsToExtraWork: React.FC = () => {
                         step="0.01"
                         min="0.01"
                         placeholder="Množství"
-                        className="w-32 rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+                        className="input-glass w-32"
                         value={material.quantity || ''}
                         onChange={(e) => updateMaterial(index, 'quantity', parseFloat(e.target.value))}
                         required
@@ -193,7 +197,8 @@ const AddMaterialsToExtraWork: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => removeMaterial(index)}
-                        className="p-2 text-red-600 hover:text-red-800"
+                        className="p-2 text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all hover:scale-110"
+                        title="Odstranit materiál"
                       >
                         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -205,19 +210,28 @@ const AddMaterialsToExtraWork: React.FC = () => {
               )}
             </div>
 
-            <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+            <div className="flex justify-end gap-3 pt-4 border-t border-gray-200/50 dark:border-gray-700/50 bg-gray-50/50 dark:bg-gray-800/30 -mx-6 px-6 -mb-5 pb-5 mt-6">
               <Link
                 to={`/extra-work/${id}`}
-                className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 dark:bg-gray-700"
+                className="btn-secondary inline-flex items-center gap-2"
               >
-                Zrušit
+                ✕ Zrušit
               </Link>
               <button
                 type="submit"
                 disabled={loading || selectedMaterials.length === 0}
-                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50"
+                className="btn-primary inline-flex items-center gap-2"
               >
-                {loading ? 'Ukládám...' : 'Uložit materiály'}
+                {loading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Ukládám...
+                  </>
+                ) : (
+                  <>
+                    💾 Uložit materiály
+                  </>
+                )}
               </button>
             </div>
           </div>

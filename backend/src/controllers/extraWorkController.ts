@@ -575,3 +575,71 @@ export const returnExtraWorkToForeman = async (req: AuthRequest, res: Response) 
     connection.release();
   }
 };
+
+export const uploadExtraWorkPhotos = async (req: AuthRequest, res: Response) => {
+  try {
+    const extraWorkId = parseInt(req.params.id);
+    const files = req.files as Express.Multer.File[];
+
+    if (!files || files.length === 0) {
+      return res.status(400).json({ message: 'Nejsou nahrány žádné fotografie' });
+    }
+
+    // Ověřit, že vícepráce existuje a že je v editovatelném stavu
+    const [extraWorks] = await pool.query(
+      'SELECT id, status, worker_id FROM extra_work WHERE id = ?',
+      [extraWorkId]
+    );
+
+    if ((extraWorks as any[]).length === 0) {
+      return res.status(404).json({ message: 'Vícepráce nenalezena' });
+    }
+
+    const extraWork = (extraWorks as any[])[0];
+
+    // Kontrola, že pouze dělník může nahrávat fotky a jen pokud je status draft nebo returned_to_worker
+    if (req.user?.role !== 'worker' || extraWork.worker_id !== req.user?.id) {
+      return res.status(403).json({ message: 'Nemáte oprávnění nahrávat fotografie k této vícepráci' });
+    }
+
+    if (!['draft', 'returned_to_worker'].includes(extraWork.status)) {
+      return res.status(400).json({ message: 'Fotografie lze nahrávat pouze u konceptu nebo vrácené vícepráce' });
+    }
+
+    const uploadedPhotos = [];
+
+    // Upload fotek do Cloudinary
+    for (const file of files) {
+      try {
+        const result = await uploadToCloudinary(file.buffer, 'extra-work');
+
+        const [dbResult] = await pool.query(
+          `INSERT INTO extra_work_photos (extra_work_id, file_path, file_name, file_size, mime_type, uploaded_by, cloudinary_id) 
+           VALUES (?, ?, ?, ?, ?, ?, ?)`,
+          [extraWorkId, result.secure_url, file.originalname, file.size, file.mimetype, req.user!.id, result.public_id]
+        );
+
+        uploadedPhotos.push({
+          id: (dbResult as any).insertId,
+          extra_work_id: extraWorkId,
+          file_path: result.secure_url,
+          file_name: file.originalname,
+          file_size: file.size,
+          uploaded_by_name: req.user!.first_name,
+          created_at: new Date().toISOString()
+        });
+      } catch (uploadError) {
+        console.error('❌ Failed to upload photo to Cloudinary:', uploadError);
+        // Pokračujeme i když se nepodaří nahrát fotku
+      }
+    }
+
+    res.status(201).json({
+      message: 'Fotografie byly úspěšně nahrány',
+      photos: uploadedPhotos
+    });
+  } catch (error) {
+    console.error('Chyba při nahrávání fotografií:', error);
+    res.status(500).json({ message: 'Chyba při nahrávání fotografií' });
+  }
+};

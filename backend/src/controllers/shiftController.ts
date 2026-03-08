@@ -14,45 +14,31 @@ export const getAllShifts = async (req: AuthRequest, res: Response) => {
         TIME_FORMAT(s.start_datetime, '%H:%i') as start_time,
         TIME_FORMAT(s.end_datetime, '%H:%i') as end_time,
         p.name as project_name,
-        GROUP_CONCAT(DISTINCT CONCAT(u.first_name, ' ', u.last_name) SEPARATOR ', ') as worker_names,
-        JSON_ARRAYAGG(
-          CASE WHEN u.id IS NULL THEN NULL ELSE JSON_OBJECT(
-            'id', u.id,
-            'first_name', u.first_name,
-            'last_name', u.last_name,
-            'role', u.role
-          ) END
-        ) as workers
+        GROUP_CONCAT(DISTINCT CONCAT(u.first_name, ' ', u.last_name) SEPARATOR ', ') as worker_names
       FROM shifts s
       JOIN projects p ON s.project_id = p.id
       LEFT JOIN shift_workers sw ON sw.shift_id = s.id
-      LEFT JOIN users u ON sw.worker_id = u.id
+      LEFT JOIN users u ON sw.user_id = u.id
       GROUP BY s.id
       ORDER BY s.start_datetime DESC`
     );
 
-    const shifts = (rows as any[]).map((row) => {
-      // workers can come as JSON string or already-parsed array depending on MySQL driver
-      const rawWorkers = row.workers;
-      const parsedWorkers = typeof rawWorkers === 'string'
-        ? JSON.parse(rawWorkers)
-        : Array.isArray(rawWorkers)
-          ? rawWorkers
-          : [];
-      const workers = Array.isArray(parsedWorkers)
-        ? parsedWorkers.filter((w) => w !== null)
-        : [];
-      return {
-        ...row,
-        workers,
-        worker_names: row.worker_names || ''
-      };
-    });
+    // Získat workers pro každou směnu samostatně
+    for (const shift of rows as any[]) {
+      const [workers] = await pool.query<RowDataPacket[]>(
+        `SELECT u.id, u.first_name, u.last_name, u.role
+         FROM shift_workers sw
+         JOIN users u ON sw.user_id = u.id
+         WHERE sw.shift_id = ?`,
+        [shift.id]
+      );
+      shift.workers = workers;
+    }
 
-    res.json(shifts);
+    res.json(rows);
   } catch (error: any) {
     console.error('Chyba při načítání směn:', error);
-    res.status(500).json({ message: 'Chyba serveru' });
+    res.status(500).json({ message: 'Chyba serveru', error: error.message });
   }
 };
 
@@ -82,12 +68,15 @@ export const createShift = async (req: AuthRequest, res: Response) => {
 
     const shiftId = result.insertId;
 
+    console.log(`📝 Přidávám ${user_ids.length} pracovníků ke směně ${shiftId}`);
     for (const uid of user_ids) {
+      console.log(`  ➡️ Přidávám pracovníka ID ${uid}`);
       await pool.query(
-        `INSERT INTO shift_workers (shift_id, worker_id) VALUES (?, ?)`,
+        `INSERT INTO shift_workers (shift_id, user_id) VALUES (?, ?)`,
         [shiftId, uid]
       );
     }
+    console.log('✅ Všichni pracovníci přidáni');
 
     // Vložit úkoly do databáze PŘED odesláním emailů
     if (Array.isArray(tasks) && tasks.length > 0) {
@@ -124,11 +113,12 @@ export const createShift = async (req: AuthRequest, res: Response) => {
       }
 
       // Získat seznam pracovníků včetně autora
+      const workerIdsWithAuthor = [...new Set([...user_ids, req.user!.id])];
       const [workers] = await pool.query<RowDataPacket[]>(
         `SELECT DISTINCT u.id, u.email, u.first_name, u.last_name 
          FROM users u 
-         WHERE u.id IN (?) OR u.id = ?`,
-        [user_ids, req.user!.id]
+         WHERE u.id IN (?)`,
+        [workerIdsWithAuthor]
       );
 
       const actionUrl = `${process.env.FRONTEND_URL}/shifts/${shiftId}`;
@@ -194,7 +184,7 @@ export const updateShift = async (req: AuthRequest, res: Response) => {
     await pool.query('DELETE FROM shift_workers WHERE shift_id = ?', [shiftId]);
     for (const uid of user_ids) {
       await pool.query(
-        `INSERT INTO shift_workers (shift_id, worker_id) VALUES (?, ?)`,
+        `INSERT INTO shift_workers (shift_id, user_id) VALUES (?, ?)`,
         [shiftId, uid]
       );
     }
@@ -247,7 +237,7 @@ export const getShiftById = async (req: AuthRequest, res: Response) => {
       FROM shifts s
       JOIN projects p ON s.project_id = p.id
       LEFT JOIN shift_workers sw ON sw.shift_id = s.id
-      LEFT JOIN users u ON sw.worker_id = u.id
+      LEFT JOIN users u ON sw.user_id = u.id
       WHERE s.id = ?
       GROUP BY s.id`,
       [shiftId]

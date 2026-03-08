@@ -16,29 +16,31 @@ const Admin: React.FC = () => {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Administrace</h1>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+      <div className="mb-6 animate-slide-up">
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+          Administrace
+        </h1>
+        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
           Správa uživatelů, projektů a materiálů
         </p>
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-gray-200 mb-6">
-        <nav className="-mb-px flex space-x-8">
+      <div className="glass-card mb-6 animate-slide-up" style={{ animationDelay: '100ms' }}>
+        <nav className="flex space-x-1 p-1">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`
-                whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
+                flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium text-sm transition-all
                 ${activeTab === tab.id
-                  ? 'border-primary text-primary'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30'
+                  : 'text-gray-600 dark:text-gray-300 hover:bg-white/50 dark:hover:bg-gray-800/50'
                 }
               `}
             >
-              <span className="mr-2">{tab.icon}</span>
+              <span className="text-xl">{tab.icon}</span>
               {tab.name}
             </button>
           ))}
@@ -46,7 +48,7 @@ const Admin: React.FC = () => {
       </div>
 
       {/* Tab Content */}
-      <div>
+      <div className="animate-slide-up" style={{ animationDelay: '200ms' }}>
         {activeTab === 'users' && <UsersManagement />}
         {activeTab === 'projects' && <ProjectsManagement />}
         {activeTab === 'materials' && <MaterialsManagement />}

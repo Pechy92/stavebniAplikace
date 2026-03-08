@@ -150,7 +150,14 @@ const UsersManagement: React.FC = () => {
   };
 
   if (loading) {
-    return <div className="text-center py-8 text-gray-500 dark:text-gray-400">Načítám uživatele...</div>;
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="glass-card inline-flex items-center gap-3 px-6 py-4 animate-pulse">
+          <div className="w-5 h-5 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
+          <span className="text-gray-700 dark:text-gray-300 font-medium">Načítám uživatele...</span>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -158,59 +165,59 @@ const UsersManagement: React.FC = () => {
       <div className="mb-4 flex justify-end">
         <button
           onClick={() => handleOpenModal()}
-          className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-dark"
+          className="btn-primary inline-flex items-center gap-2 group"
         >
-          <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+          <svg className="w-5 h-5 group-hover:scale-110 transition-transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
           </svg>
           Nový uživatel
         </button>
       </div>
 
-      <div className="bg-white shadow rounded-lg overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50 dark:bg-gray-700">
+      <div className="glass-card overflow-hidden">
+        <table className="min-w-full divide-y divide-gray-200/50 dark:divide-gray-700/50">
+          <thead className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-700/50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jméno</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Telefon</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stav</th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Akce</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Jméno</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Email</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Telefon</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Role</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Stav</th>
+              <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Akce</th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="divide-y divide-gray-200/50 dark:divide-gray-700/50">
             {users.map((user) => (
-              <tr key={user.id} className="hover:bg-gray-50 dark:bg-gray-700">
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+              <tr key={user.id} className="hover:bg-white/50 dark:hover:bg-gray-800/30 transition-colors">
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                   {user.first_name} {user.last_name}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
                   {user.email}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
                   {user.phone}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">
                   {getRoleName(user.role)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${user.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                    {user.active ? 'Aktivní' : 'Neaktivní'}
+                  <span className={`badge-glass ${user.active ? 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700' : 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700'}`}>
+                    {user.active ? '✓ Aktivní' : '○ Neaktivní'}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-3">
                   <button
                     onClick={() => handleOpenModal(user)}
-                    className="text-primary hover:text-primary-dark"
+                    className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium transition-colors"
                   >
-                    Upravit
+                    ✏️ Upravit
                   </button>
                   <button
                     onClick={() => handleToggleActive(user.id, user.active)}
-                    className="text-gray-600 hover:text-gray-900"
+                    className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 font-medium transition-colors"
                   >
-                    {user.active ? 'Deaktivovat' : 'Aktivovat'}
+                    {user.active ? '⊘ Deaktivovat' : '✓ Aktivovat'}
                   </button>
                 </td>
               </tr>
@@ -221,15 +228,15 @@ const UsersManagement: React.FC = () => {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed z-10 inset-0 overflow-y-auto">
+        <div className="fixed z-50 inset-0 overflow-y-auto animate-scale-in">
           <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={handleCloseModal}></div>
+            <div className="fixed inset-0 bg-gray-900/75 backdrop-blur-sm transition-opacity" onClick={handleCloseModal}></div>
 
-            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <div className="inline-block align-bottom glass-card text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
               <form onSubmit={handleSubmit}>
-                <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                  <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-                    {editingUser ? 'Upravit uživatele' : 'Nový uživatel'}
+                <div className="px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                  <h3 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent mb-6">
+                    {editingUser ? '✏️ Upravit uživatele' : '➕ Nový uživatel'}
                   </h3>
                   
                   <div className="space-y-4">
@@ -240,7 +247,7 @@ const UsersManagement: React.FC = () => {
                       <input
                         type="email"
                         required
-                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+                        className="input-glass"
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       />
@@ -254,7 +261,7 @@ const UsersManagement: React.FC = () => {
                       <input
                         type="password"
                         required={!editingUser}
-                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+                        className="input-glass"
                         value={formData.password}
                         onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                       />
@@ -268,7 +275,7 @@ const UsersManagement: React.FC = () => {
                         <input
                           type="text"
                           required
-                          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+                          className="input-glass"
                           value={formData.firstName}
                           onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
                         />
@@ -280,7 +287,7 @@ const UsersManagement: React.FC = () => {
                         <input
                           type="text"
                           required
-                          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+                          className="input-glass"
                           value={formData.lastName}
                           onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
                         />
@@ -293,7 +300,7 @@ const UsersManagement: React.FC = () => {
                       </label>
                       <input
                         type="tel"
-                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+                        className="input-glass"
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       />
@@ -305,7 +312,7 @@ const UsersManagement: React.FC = () => {
                       </label>
                       <select
                         required
-                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+                        className="input-glass"
                         value={formData.role}
                         onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                       >
@@ -318,19 +325,19 @@ const UsersManagement: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                <div className="bg-gray-50/50 dark:bg-gray-800/30 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-3">
                   <button
                     type="submit"
-                    className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-primary text-base font-medium text-white hover:bg-primary-dark sm:ml-3 sm:w-auto sm:text-sm"
+                    className="btn-primary w-full sm:w-auto"
                   >
-                    {editingUser ? 'Uložit' : 'Vytvořit'}
+                    {editingUser ? '💾 Uložit' : '➕ Vytvořit'}
                   </button>
                   <button
                     type="button"
                     onClick={handleCloseModal}
-                    className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                    className="btn-secondary w-full sm:w-auto"
                   >
-                    Zrušit
+                    ✕ Zrušit
                   </button>
                 </div>
               </form>

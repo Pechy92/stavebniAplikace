@@ -1,6 +1,7 @@
 import { Router } from 'express';
-import multer from 'multer';
 import { authenticate } from '../middleware/auth';
+import { upload } from '../middleware/upload';
+import { uploadLimiter } from '../middleware/rateLimiters';
 import { 
   getAllShifts, 
   createShift, 
@@ -17,7 +18,6 @@ import {
   completeShiftTask
 } from '../controllers/shiftController';
 
-const upload = multer({ dest: 'temp/uploads' });
 const router = Router();
 
 router.use(authenticate);
@@ -29,7 +29,7 @@ router.put('/:id', updateShift);
 router.delete('/:id', deleteShift);
 
 // Photo endpoints
-router.post('/:id/photos', upload.array('photos', 10), uploadShiftPhotos);
+router.post('/:id/photos', uploadLimiter, upload.array('photos', 10), uploadShiftPhotos);
 router.get('/:id/photos', getShiftPhotos);
 router.delete('/:id/photos/:photoId', deleteShiftPhoto);
 

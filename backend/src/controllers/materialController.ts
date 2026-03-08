@@ -4,9 +4,15 @@ import { AuthRequest } from '../middleware/auth';
 
 export const getAllMaterials = async (req: AuthRequest, res: Response) => {
   try {
-    const { search, category } = req.query;
-    let query = 'SELECT id, name, description, unit_price, unit, category, sku FROM materials WHERE is_active = TRUE';
+    const { search, category, projectId } = req.query;
+    let query = 'SELECT id, name, description, unit_price, unit, category, project_id, sku FROM materials WHERE is_active = TRUE';
     const params: any[] = [];
+
+    // Pokud je zadaný projekt, vrať globální + projektové materiály.
+    if (projectId) {
+      query += ' AND (project_id IS NULL OR project_id = ?)';
+      params.push(projectId);
+    }
 
     if (search) {
       query += ' AND (name LIKE ? OR description LIKE ? OR sku LIKE ?)';
@@ -46,12 +52,12 @@ export const getMaterialById = async (req: AuthRequest, res: Response) => {
 
 export const createMaterial = async (req: AuthRequest, res: Response) => {
   try {
-    const { name, description, unitPrice, unit, category, sku } = req.body;
+    const { name, description, unitPrice, unit, category, sku, projectId } = req.body;
 
     const [result] = await pool.query(
-      `INSERT INTO materials (name, description, unit_price, unit, category, sku, created_by)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [name, description, unitPrice, unit, category, sku, req.user?.id]
+      `INSERT INTO materials (name, description, unit_price, unit, category, project_id, sku, created_by)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [name, description, unitPrice, unit, category, projectId || null, sku, req.user?.id]
     );
 
     res.status(201).json({ message: 'Materiál vytvořen', materialId: (result as any).insertId });
@@ -66,13 +72,13 @@ export const createMaterial = async (req: AuthRequest, res: Response) => {
 export const updateMaterial = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
-    const { name, description, unitPrice, unit, category, sku } = req.body;
+    const { name, description, unitPrice, unit, category, sku, projectId } = req.body;
 
     await pool.query(
       `UPDATE materials 
-       SET name = ?, description = ?, unit_price = ?, unit = ?, category = ?, sku = ?, updated_by = ?
+       SET name = ?, description = ?, unit_price = ?, unit = ?, category = ?, project_id = ?, sku = ?, updated_by = ?
        WHERE id = ?`,
-      [name, description, unitPrice, unit, category, sku, req.user?.id, id]
+      [name, description, unitPrice, unit, category, projectId || null, sku, req.user?.id, id]
     );
 
     res.json({ message: 'Materiál aktualizován' });

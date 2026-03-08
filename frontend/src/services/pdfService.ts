@@ -251,9 +251,16 @@ export const generateExtraWorkPDF = async (extraWork: ExtraWork): Promise<void> 
         if (photo.file_path.startsWith('http')) {
           imageUrl = photo.file_path;
         } else {
-          const apiUrl = import.meta.env.MODE === 'production'
-            ? 'https://stavebniaplikacebackend-production.up.railway.app'
-            : 'http://localhost:3001';
+          const getBackendUrl = (): string => {
+            if (import.meta.env.VITE_API_URL) {
+              return import.meta.env.VITE_API_URL;
+            }
+            if (import.meta.env.MODE === 'production') {
+              return 'https://api-stavby.cmpe.cz';
+            }
+            return 'http://localhost:3001';
+          };
+          const apiUrl = getBackendUrl();
           imageUrl = `${apiUrl}${photo.file_path}`;
         }
         

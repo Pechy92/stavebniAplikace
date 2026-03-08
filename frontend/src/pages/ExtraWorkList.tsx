@@ -107,18 +107,6 @@ const ExtraWorkList: React.FC = () => {
     return t(`extraWork.statuses.${status}`, status);
   };
 
-  const getStatusColor = (status: string) => {
-    const colors: { [key: string]: string } = {
-      'draft': 'bg-gray-100 text-gray-800',
-      'submitted_to_foreman': 'bg-blue-100 text-blue-800',
-      'returned_to_worker': 'bg-yellow-100 text-yellow-800',
-      'submitted_to_manager': 'bg-purple-100 text-purple-800',
-      'returned_to_foreman': 'bg-orange-100 text-orange-800',
-      'approved': 'bg-green-100 text-green-800'
-    };
-    return colors[status] || 'bg-gray-100 text-gray-800';
-  };
-
   const formatDate = (dateString?: string) => {
     if (!dateString) return t('dashboard.withoutDate');
     return new Date(dateString).toLocaleDateString('cs-CZ');
@@ -127,7 +115,10 @@ const ExtraWorkList: React.FC = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="text-gray-500 dark:text-gray-400">{t('common.loading')}...</div>
+        <div className="glass-card inline-flex items-center gap-3 px-6 py-4 animate-pulse">
+          <div className="w-5 h-5 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
+          <span className="text-gray-700 dark:text-gray-300 font-medium">{t('common.loading')}...</span>
+        </div>
       </div>
     );
   }
@@ -136,15 +127,20 @@ const ExtraWorkList: React.FC = () => {
     <div>
       <div className="sm:flex sm:items-center sm:justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('extraWork.title')}</h1>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            {t('shifts.total')}: {translatedExtraWorks.length}
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent animate-slide-up">
+            {t('extraWork.title')}
+          </h1>
+          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2 animate-slide-up" style={{ animationDelay: '100ms' }}>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            {t('shifts.total')}: <span className="font-bold text-primary-600">{translatedExtraWorks.length}</span>
           </p>
         </div>
-        <div className="mt-4 sm:mt-0">
+        <div className="mt-4 sm:mt-0 animate-slide-up" style={{ animationDelay: '200ms' }}>
           <Link
             to={canCreate ? '/extra-work/new' : '#'}
-            className={`inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 ${canCreate ? 'bg-primary hover:bg-primary-dark focus:ring-primary' : 'bg-gray-400 cursor-not-allowed'}`}
+            className={canCreate ? 'btn-primary inline-flex items-center gap-2' : 'inline-flex items-center gap-2 px-6 py-3 bg-gray-400 text-white rounded-xl font-medium cursor-not-allowed opacity-50'}
             aria-disabled={!canCreate}
             onClick={(e) => {
               if (!canCreate) {
@@ -153,8 +149,8 @@ const ExtraWorkList: React.FC = () => {
               }
             }}
           >
-            <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
             {t('dashboard.newExtraWork')}
           </Link>
@@ -162,28 +158,28 @@ const ExtraWorkList: React.FC = () => {
       </div>
 
       {/* Filtry */}
-      <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4 mb-6">
+      <div className="glass-card p-6 mb-6 animate-slide-up" style={{ animationDelay: '300ms' }}>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <div>
-            <label htmlFor="search" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="search" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               {t('common.search')}
             </label>
             <input
               type="text"
               id="search"
               placeholder={`${t('extraWork.description')} nebo ${t('extraWork.customId')}...`}
-              className="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+              className="input-glass"
               value={filters.search}
               onChange={(e) => setFilters({ ...filters, search: e.target.value })}
             />
           </div>
           <div>
-            <label htmlFor="status" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="status" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               {t('extraWork.status')}
             </label>
             <select
               id="status"
-              className="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+              className="input-glass"
               value={filters.status}
               onChange={(e) => setFilters({ ...filters, status: e.target.value })}
             >
@@ -197,7 +193,7 @@ const ExtraWorkList: React.FC = () => {
             </select>
           </div>
           <div>
-            <label htmlFor="projectId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="projectId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               {t('shifts.project')}
             </label>
             <select
@@ -244,34 +240,36 @@ const ExtraWorkList: React.FC = () => {
       </div>
 
       {/* Tabulka */}
-      <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
+      <div className="glass-card overflow-hidden animate-slide-up" style={{ animationDelay: '400ms' }}>
         {translatedExtraWorks.length === 0 ? (
-          <div className="text-center py-12">
-            <svg
-              className="mx-auto h-12 w-12 text-gray-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-              />
-            </svg>
-            <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">{t('extraWork.noWork')}</h3>
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          <div className="text-center py-16">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-700/50 mb-4">
+              <svg
+                className="h-8 w-8 text-gray-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+            </div>
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white">{t('extraWork.noWork')}</h3>
+            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
               {user?.role === 'worker' ? t('extraWork.createFirst') : t('extraWork.noneFound')}
             </p>
             {user?.role === 'worker' && (
               <div className="mt-6">
                 <Link
                   to="/extra-work/new"
-                  className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark"
+                  className="btn-primary inline-flex items-center gap-2"
                 >
-                  <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                   </svg>
                   {t('dashboard.newExtraWork')}
                 </Link>
@@ -280,63 +278,66 @@ const ExtraWorkList: React.FC = () => {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50 dark:bg-gray-700">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <table className="min-w-full">
+              <thead>
+              <tr className="border-b border-white/10 dark:border-gray-700/50">
+                <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                   {t('extraWork.customId')}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                   {t('extraWork.name')}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                   {t('shifts.project')}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                   {t('shifts.date')}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                   {t('extraWork.status')}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                   {t('extraWork.createdBy')}
                 </th>
-                <th className="relative px-6 py-3">
+                <th className="relative px-6 py-4">
                   <span className="sr-only">{t('dashboard.view')}</span>
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-              {translatedExtraWorks.map((extraWork) => (
-                <tr key={extraWork.id} className="hover:bg-gray-50 dark:bg-gray-700">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                    {extraWork.custom_id}
+            <tbody className="divide-y divide-white/5 dark:divide-gray-700/30">
+              {translatedExtraWorks.map((extraWork, index) => (
+                <tr key={extraWork.id} className="group hover:bg-white/30 dark:hover:bg-gray-700/30 transition-all duration-300 animate-slide-up" style={{ animationDelay: `${index * 50}ms` }}>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className="text-sm font-bold text-gray-900 dark:text-white">{extraWork.custom_id}</span>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">
-                    <div className="max-w-xs truncate">{extraWork.name || extraWork.description}</div>
+                  <td className="px-6 py-4">
+                    <div className="max-w-xs truncate text-sm font-medium text-gray-900 dark:text-white">{extraWork.name || extraWork.description}</div>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-                    <div className="max-w-xs truncate">{extraWork.project_name}</div>
+                  <td className="px-6 py-4">
+                    <div className="max-w-xs truncate text-sm text-gray-600 dark:text-gray-400">{extraWork.project_name}</div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
                     {formatDate(extraWork.created_at)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(extraWork.status)}`}>
+                    <span className="badge-glass">
                       {getStatusText(extraWork.status)}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
                     {extraWork.created_by_first_name && extraWork.created_by_last_name 
                       ? `${extraWork.created_by_first_name} ${extraWork.created_by_last_name}`
                       : 'Neznámý'}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <td className="px-6 py-4 whitespace-nowrap text-right">
                     <Link
                       to={`/extra-work/${extraWork.id}`}
-                      className="text-primary hover:text-primary-dark"
+                      className="text-primary-600 hover:text-primary-700 font-medium text-sm flex items-center justify-end gap-1 group-hover:gap-2 transition-all"
                     >
                       Zobrazit
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
                     </Link>
                   </td>
                 </tr>

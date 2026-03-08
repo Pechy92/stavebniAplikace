@@ -223,16 +223,23 @@ const ProjectsManagement: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     const colors: { [key: string]: string } = {
-      active: 'bg-green-100 text-green-800',
-      completed: 'bg-blue-100 text-blue-800',
-      paused: 'bg-yellow-100 text-yellow-800',
-      cancelled: 'bg-red-100 text-red-800'
+      active: 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700',
+      completed: 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700',
+      paused: 'bg-yellow-100 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-700',
+      cancelled: 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700'
     };
-    return colors[status] || 'bg-gray-100 text-gray-800';
+    return colors[status] || 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-900/30 dark:text-gray-300 dark:border-gray-700';
   };
 
   if (loading) {
-    return <div className="text-center py-8 text-gray-500 dark:text-gray-400">Načítám projekty...</div>;
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="glass-card inline-flex items-center gap-3 px-6 py-4 animate-pulse">
+          <div className="w-5 h-5 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
+          <span className="text-gray-700 dark:text-gray-300 font-medium">Načítám projekty...</span>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -240,32 +247,32 @@ const ProjectsManagement: React.FC = () => {
       <div className="mb-4 flex justify-end">
         <button
           onClick={() => handleOpenModal()}
-          className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-dark"
+          className="btn-primary inline-flex items-center gap-2 group"
         >
-          <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+          <svg className="w-5 h-5 group-hover:scale-110 transition-transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
           </svg>
           Nový projekt
         </button>
       </div>
 
-      <div className="bg-white shadow rounded-lg overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50 dark:bg-gray-700">
+      <div className="glass-card overflow-hidden">
+        <table className="min-w-full divide-y divide-gray-200/50 dark:divide-gray-700/50">
+          <thead className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-700/50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Číslo</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Název</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Adresa</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Začátek</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stav</th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Akce</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Číslo</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Název</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Adresa</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Začátek</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Stav</th>
+              <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Akce</th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="divide-y divide-gray-200/50 dark:divide-gray-700/50">
             {projects.map((project) => {
               console.log(`🔍 Zobrazuji projekt: ID=${project.id}, custom_id="${project.custom_id}", name="${project.name}"`);
               return (
-                <tr key={project.id} className="hover:bg-gray-50 dark:bg-gray-700">
+                <tr key={project.id} className="hover:bg-white/50 dark:hover:bg-gray-800/30 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     {project.custom_id || <span className="text-red-500">(chybí)</span>}
                   </td>
@@ -279,16 +286,16 @@ const ProjectsManagement: React.FC = () => {
                   {new Date(project.start_date).toLocaleDateString('cs-CZ')}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(project.status)}`}>
+                  <span className={`badge-glass ${getStatusColor(project.status)}`}>
                     {getStatusText(project.status)}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <button
                     onClick={() => handleOpenModal(project)}
-                    className="text-primary hover:text-primary-dark"
+                    className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium transition-colors"
                   >
-                    Upravit
+                    ✏️ Upravit
                   </button>
                 </td>
               </tr>
@@ -300,15 +307,15 @@ const ProjectsManagement: React.FC = () => {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed z-10 inset-0 overflow-y-auto">
+        <div className="fixed z-50 inset-0 overflow-y-auto animate-scale-in">
           <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={handleCloseModal}></div>
+            <div className="fixed inset-0 bg-gray-900/75 backdrop-blur-sm transition-opacity" onClick={handleCloseModal}></div>
 
-            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <div className="inline-block align-bottom glass-card text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
               <form onSubmit={handleSubmit}>
-                <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                  <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-                    {editingProject ? 'Upravit projekt' : 'Nový projekt'}
+                <div className="px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                  <h3 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent mb-6">
+                    {editingProject ? '✏️ Upravit projekt' : '➕ Nový projekt'}
                   </h3>
                   
                   <div className="space-y-4">
@@ -319,7 +326,7 @@ const ProjectsManagement: React.FC = () => {
                       <input
                         type="text"
                         required
-                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+                        className="input-glass"
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       />
@@ -332,7 +339,7 @@ const ProjectsManagement: React.FC = () => {
                       <input
                         type="text"
                         required
-                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+                        className="input-glass"
                         value={formData.customId}
                         onChange={(e) => setFormData({ ...formData, customId: e.target.value })}
                       />
@@ -345,7 +352,7 @@ const ProjectsManagement: React.FC = () => {
                       <input
                         type="text"
                         required
-                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+                        className="input-glass"
                         value={formData.address}
                         onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                       />
@@ -359,7 +366,7 @@ const ProjectsManagement: React.FC = () => {
                         <input
                           type="date"
                           required
-                          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+                          className="input-glass"
                           value={formData.startDate}
                           onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
                         />
@@ -370,7 +377,7 @@ const ProjectsManagement: React.FC = () => {
                         </label>
                         <input
                           type="date"
-                          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+                          className="input-glass"
                           value={formData.plannedEndDate}
                           onChange={(e) => setFormData({ ...formData, plannedEndDate: e.target.value })}
                         />
@@ -383,7 +390,7 @@ const ProjectsManagement: React.FC = () => {
                       </label>
                       <select
                         required
-                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+                        className="input-glass"
                         value={formData.status}
                         onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                       >
@@ -471,19 +478,19 @@ const ProjectsManagement: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                <div className="bg-gray-50/50 dark:bg-gray-800/30 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-3">
                   <button
                     type="submit"
-                    className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-primary text-base font-medium text-white hover:bg-primary-dark sm:ml-3 sm:w-auto sm:text-sm"
+                    className="btn-primary w-full sm:w-auto"
                   >
-                    {editingProject ? 'Uložit' : 'Vytvořit'}
+                    {editingProject ? '💾 Uložit' : '➕ Vytvořit'}
                   </button>
                   <button
                     type="button"
                     onClick={handleCloseModal}
-                    className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                    className="btn-secondary w-full sm:w-auto"
                   >
-                    Zrušit
+                    ✕ Zrušit
                   </button>
                 </div>
               </form>

@@ -83,6 +83,7 @@ export async function createTables() {
         unit_price DECIMAL(10,2),
         unit VARCHAR(20),
         category VARCHAR(100),
+        project_id INT,
         sku VARCHAR(100) UNIQUE,
         is_active BOOLEAN DEFAULT TRUE,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -91,8 +92,10 @@ export async function createTables() {
         updated_by INT,
         INDEX idx_name (name),
         INDEX idx_category (category),
+        INDEX idx_project_id (project_id),
         INDEX idx_sku (sku),
         INDEX idx_is_active (is_active),
+        FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
         FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
         FOREIGN KEY (updated_by) REFERENCES users(id) ON DELETE SET NULL
       )

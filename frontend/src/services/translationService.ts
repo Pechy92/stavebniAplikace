@@ -26,10 +26,17 @@ export const translationService = {
 
     try {
       // Použit backend API pro překlad
-      const apiUrl = import.meta.env.MODE === 'production' 
-        ? 'https://stavebniaplikacebackend-production.up.railway.app/api/translate'
-        : 'http://localhost:3001/api/translate';
+      const getTranslationApiUrl = (): string => {
+        if (import.meta.env.VITE_API_URL) {
+          return `${import.meta.env.VITE_API_URL}/api/translate`;
+        }
+        if (import.meta.env.MODE === 'production') {
+          return 'https://api-stavby.cmpe.cz/api/translate';
+        }
+        return 'http://localhost:3001/api/translate';
+      };
       
+      const apiUrl = getTranslationApiUrl();
       console.log('🌐 Translation API URL:', apiUrl);
       console.log('📝 Translating text:', text);
       

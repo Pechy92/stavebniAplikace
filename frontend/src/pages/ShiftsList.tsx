@@ -122,17 +122,22 @@ const ShiftsList: React.FC = () => {
     <div>
       <div className="sm:flex sm:items-center sm:justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('shifts.title')}</h1>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            {t('shifts.total')}: {filteredShifts.length}
-          </p>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent mb-3">
+            {t('shifts.title')}
+          </h1>
+          <div className="inline-flex items-center gap-2 glass-card px-4 py-2">
+            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+            <p className="text-sm text-gray-700 dark:text-gray-300">
+              {t('shifts.total')}: <span className="font-bold">{filteredShifts.length}</span>
+            </p>
+          </div>
         </div>
         <div className="mt-4 sm:mt-0">
           <Link
             to="/shifts/new"
-            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-dark"
+            className="btn-primary inline-flex items-center gap-2"
           >
-            <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
             </svg>
             {t('shifts.newShift')}
@@ -141,7 +146,11 @@ const ShiftsList: React.FC = () => {
       </div>
 
       {/* Filtry */}
-      <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4 mb-6">
+      <div className="glass-card p-6 mb-6">
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-1 h-6 bg-gradient-to-b from-blue-500 to-blue-600 rounded-full"></div>
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white">Filtry</h3>
+        </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <div>
             <label htmlFor="dateFrom" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -150,7 +159,7 @@ const ShiftsList: React.FC = () => {
             <input
               type="date"
               id="dateFrom"
-              className="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+              className="input-glass"
               value={filters.dateFrom}
               onChange={(e) => setFilters({ ...filters, dateFrom: e.target.value })}
             />
@@ -162,7 +171,7 @@ const ShiftsList: React.FC = () => {
             <input
               type="date"
               id="dateTo"
-              className="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+              className="input-glass"
               value={filters.dateTo}
               onChange={(e) => setFilters({ ...filters, dateTo: e.target.value })}
             />
@@ -173,7 +182,7 @@ const ShiftsList: React.FC = () => {
             </label>
             <select
               id="projectId"
-              className="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+              className="input-glass"
               value={filters.projectId}
               onChange={(e) => setFilters({ ...filters, projectId: e.target.value })}
             >
@@ -191,7 +200,7 @@ const ShiftsList: React.FC = () => {
             </label>
             <select
               id="userId"
-              className="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+              className="input-glass"
               value={filters.userId}
               onChange={(e) => setFilters({ ...filters, userId: e.target.value })}
             >
@@ -206,7 +215,7 @@ const ShiftsList: React.FC = () => {
           <div className="flex items-end">
             <button
               onClick={() => setFilters({ dateFrom: '', dateTo: '', projectId: '', userId: '' })}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+              className="w-full btn-secondary"
             >
               {t('shifts.clearFilters')}
             </button>
@@ -217,28 +226,31 @@ const ShiftsList: React.FC = () => {
       {/* Seznam směn seskupených po týdnech */}
       <div className="space-y-6">
         {Object.keys(weeklyShifts).length === 0 ? (
-          <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-12 text-center">
-            <svg
-              className="mx-auto h-12 w-12 text-gray-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-              />
-            </svg>
-            <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">{t('shifts.noShifts')}</h3>
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{t('shifts.createFirst')}</p>
-            <div className="mt-6">
+          <div className="glass-card p-12 text-center animate-scale-in">
+            <div className="relative inline-block">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full blur-xl opacity-50"></div>
+              <svg
+                className="mx-auto h-12 w-12 text-blue-600 relative z-10"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
+              </svg>
+            </div>
+            <h3 className="mt-4 text-lg font-bold text-gray-900 dark:text-white">{t('shifts.noShifts')}</h3>
+            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">{t('shifts.createFirst')}</p>
+            <div className="mt-8">
               <Link
                 to="/shifts/new"
-                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark"
+                className="btn-primary inline-flex items-center gap-2"
               >
-                <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
                 </svg>
                 {t('shifts.newShift')}
@@ -254,31 +266,32 @@ const ShiftsList: React.FC = () => {
             weekEnd.setDate(weekEnd.getDate() + 6);
 
             return (
-              <div key={weekKey} className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
-                <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
+              <div key={weekKey} className="glass-card overflow-hidden animate-slide-up" style={{ animationDelay: `${Object.keys(weeklyShifts).sort().reverse().indexOf(weekKey) * 50}ms` }}>
+                <div className="px-6 py-4 bg-gradient-to-r from-blue-500/10 to-transparent border-b border-white/20 dark:border-gray-700/50">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                      <div className="w-1 h-6 bg-gradient-to-b from-blue-500 to-blue-600 rounded-full"></div>
                       {t('shifts.week')} {formatDate(weekStart.toISOString())} - {formatDate(weekEnd.toISOString())}
                     </h3>
-                    <span className="text-sm text-gray-500 dark:text-gray-400">
-                      {t('shifts.totalHours')}: <span className="font-medium text-gray-900 dark:text-white">{totalHours.toFixed(1)}h</span>
+                    <span className="badge-glass">
+                      {t('shifts.totalHours')}: <span className="font-bold">{totalHours.toFixed(1)}h</span>
                     </span>
                   </div>
                 </div>
                 <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50 dark:bg-gray-700">
+                  <table className="min-w-full divide-y divide-white/10 dark:divide-gray-700/50">
+                    <thead className="bg-gradient-to-r from-primary-500/10 to-transparent">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('shifts.date')}</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('shifts.workers')}</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('shifts.project')}</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('shifts.time')}</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('shifts.hours')}</th>
+                      <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">{t('shifts.date')}</th>
+                      <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">{t('shifts.workers')}</th>
+                      <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">{t('shifts.project')}</th>
+                      <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">{t('shifts.time')}</th>
+                      <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">{t('shifts.hours')}</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                  <tbody className="divide-y divide-white/10 dark:divide-gray-700/50">
                     {weekShifts.map((shift) => (
-                      <tr key={shift.id} className="hover:bg-blue-50 cursor-pointer" onClick={() => navigate(`/shifts/${shift.id}`)}>
+                      <tr key={shift.id} className="hover:bg-white/50 dark:hover:bg-gray-700/50 cursor-pointer transition-all duration-200" onClick={() => navigate(`/shifts/${shift.id}`)}>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                           {formatDate(shift.date)}
                         </td>

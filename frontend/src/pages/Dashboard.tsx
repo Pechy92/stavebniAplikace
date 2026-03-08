@@ -55,39 +55,43 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <div className="px-4 sm:px-0">
+    <div className="px-4 sm:px-0 animate-slide-up">
+      {/* Header with Glass Effect */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent mb-3">
           {t('dashboard.welcome')}, {user?.firstName} {user?.lastName}
         </h1>
-        <p className="mt-2 text-gray-600">
-          {t('dashboard.role')}: {t(`dashboard.roles.${user?.role}`)}
-        </p>
+        <div className="inline-flex items-center gap-2 glass-card px-4 py-2">
+          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+          <p className="text-gray-700 dark:text-gray-300 font-medium">
+            {t('dashboard.role')}: <span className="text-primary-600 dark:text-primary-400">{t(`dashboard.roles.${user?.role}`)}</span>
+          </p>
+        </div>
       </div>
 
+      {/* Action Cards with Glassmorphism */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-8">
         {user?.role === 'worker' && (
           <Link
             to="/extra-work/new"
-            className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow"
+            className="group floating-card p-6"
+            style={{ boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.15)' }}
+            onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 0 20px rgba(239, 68, 68, 0.3)'}
+            onMouseLeave={(e) => e.currentTarget.style.boxShadow = '0 8px 32px 0 rgba(31, 38, 135, 0.15)'}
           >
-            <div className="p-5">
-              <div className="flex items-center">
-                <div className="flex-shrink-0 bg-primary rounded-md p-3">
-                  <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">
-                      {t('dashboard.newExtraWork')}
-                    </dt>
-                    <dd className="text-lg font-medium text-gray-900 dark:text-white">
-                      {t('dashboard.create')}
-                    </dd>
-                  </dl>
-                </div>
+            <div className="flex items-center">
+              <div className="flex-shrink-0 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl p-4 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <svg className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+              </div>
+              <div className="ml-5 flex-1">
+                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                  {t('dashboard.newExtraWork')}
+                </dt>
+                <dd className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                  {t('dashboard.create')} →
+                </dd>
               </div>
             </div>
           </Link>
@@ -95,95 +99,98 @@ const Dashboard: React.FC = () => {
 
         <Link
           to="/extra-work"
-          className="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow"
+          className="group floating-card p-6"
         >
-          <div className="p-5">
-            <div className="flex items-center">
-              <div className="flex-shrink-0 bg-blue-500 rounded-md p-3">
-                <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">
-                    {t('dashboard.allExtraWork')}
-                  </dt>
-                  <dd className="text-lg font-medium text-gray-900 dark:text-white">
-                    {t('dashboard.view')}
-                  </dd>
-                </dl>
-              </div>
+          <div className="flex items-center">
+            <div className="flex-shrink-0 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-4 shadow-lg group-hover:scale-110 transition-transform duration-300">
+              <svg className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <div className="ml-5 flex-1">
+              <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                {t('dashboard.allExtraWork')}
+              </dt>
+              <dd className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                {t('dashboard.view')} →
+              </dd>
             </div>
           </div>
         </Link>
 
         <Link
           to="/shifts"
-          className="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow"
+          className="group floating-card p-6"
         >
-          <div className="p-5">
-            <div className="flex items-center">
-              <div className="flex-shrink-0 bg-green-500 rounded-md p-3">
-                <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">
-                    {t('shifts.title')}
-                  </dt>
-                  <dd className="text-lg font-medium text-gray-900 dark:text-white">
-                    {t('dashboard.view')}
-                  </dd>
-                </dl>
-              </div>
+          <div className="flex items-center">
+            <div className="flex-shrink-0 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-4 shadow-lg group-hover:scale-110 transition-transform duration-300">
+              <svg className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <div className="ml-5 flex-1">
+              <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                {t('shifts.title')}
+              </dt>
+              <dd className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
+                {t('dashboard.view')} →
+              </dd>
             </div>
           </div>
         </Link>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg">
-        <div className="px-4 py-5 sm:px-6">
-          <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white">
+      {/* Recent Extra Work with Glass Card */}
+      <div className="glass-card overflow-hidden">
+        <div className="px-6 py-5 bg-gradient-to-r from-primary-500/10 to-transparent border-b border-white/20 dark:border-gray-700/50">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+            <div className="w-1 h-6 bg-gradient-to-b from-primary-500 to-primary-600 rounded-full"></div>
             {t('dashboard.recentExtraWork')}
           </h3>
         </div>
-        <div className="border-t border-gray-200">
+        <div>
           {loading ? (
-            <div className="p-4 text-center">{t('dashboard.loading')}</div>
+            <div className="p-8 text-center">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primary-500 border-t-transparent"></div>
+              <p className="mt-3 text-gray-600 dark:text-gray-400">{t('dashboard.loading')}</p>
+            </div>
           ) : translatedExtraWorks.length === 0 ? (
-            <div className="p-4 text-center text-gray-500 dark:text-gray-400">{t('dashboard.noExtraWork')}</div>
+            <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+              <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <p className="mt-3">{t('dashboard.noExtraWork')}</p>
+            </div>
           ) : (
-            <ul className="divide-y divide-gray-200">
-              {translatedExtraWorks.map((extraWork) => (
-                <li key={extraWork.id}>
+            <ul className="divide-y divide-white/10 dark:divide-gray-700/50">
+              {translatedExtraWorks.map((extraWork, index) => (
+                <li key={extraWork.id} style={{ animationDelay: `${index * 50}ms` }} className="animate-slide-up">
                   <Link
                     to={`/extra-work/${extraWork.id}`}
-                    className="block hover:bg-gray-50 transition-colors"
+                    className="block hover:bg-white/50 dark:hover:bg-gray-700/50 transition-all duration-300 group"
                   >
-                    <div className="px-4 py-4 sm:px-6">
-                      <div className="flex items-center justify-between">
-                        <p className="text-sm font-medium text-primary truncate">
+                    <div className="px-6 py-5">
+                      <div className="flex items-center justify-between mb-3">
+                        <p className="text-base font-bold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors flex items-center gap-2">
+                          <span className="w-2 h-2 bg-primary-500 rounded-full"></span>
                           {extraWork.name}
                         </p>
-                        <div className="ml-2 flex-shrink-0 flex">
-                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(extraWork.status)}`}>
-                            {getStatusText(extraWork.status)}
-                          </span>
-                        </div>
+                        <span className={`badge-glass ${getStatusColor(extraWork.status)}`}>
+                          {getStatusText(extraWork.status)}
+                        </span>
                       </div>
-                      <div className="mt-2 sm:flex sm:justify-between">
-                        <div className="sm:flex">
-                          <p className="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                            {extraWork.project_name || t('dashboard.withoutProject')}
-                          </p>
+                      <div className="flex items-center justify-between text-sm">
+                        <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                          </svg>
+                          {extraWork.project_name || t('dashboard.withoutProject')}
                         </div>
-                        <div className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                          <p>
-                            {extraWork.created_at ? new Date(extraWork.created_at).toLocaleDateString('cs-CZ') : t('dashboard.withoutDate')}
-                          </p>
+                        <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          {extraWork.created_at ? new Date(extraWork.created_at).toLocaleDateString('cs-CZ') : t('dashboard.withoutDate')}
                         </div>
                       </div>
                     </div>

@@ -12,6 +12,11 @@ export const uploadToCloudinary = (
   folder: string
 ): Promise<any> => {
   return new Promise((resolve, reject) => {
+    if (!fileBuffer) {
+      reject(new Error('File buffer is undefined'));
+      return;
+    }
+
     const uploadStream = cloudinary.uploader.upload_stream(
       {
         folder: `stavebni-aplikace/${folder}`,

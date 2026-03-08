@@ -89,24 +89,24 @@ const ExtraWorkForm: React.FC = () => {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Nová vícepráce</h1>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+      <div className="mb-6 animate-slide-up">
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">Nová vícepráce</h1>
+        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
           Vytvořte novou vícepráci a přidejte fotografie a materiály
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
+      <form onSubmit={handleSubmit} className="glass-card animate-slide-up" style={{ animationDelay: '100ms' }}>
         <div className="px-6 py-5 space-y-6">
           {/* Projekt */}
           <div>
-            <label htmlFor="project" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="project" className="block text-sm font-medium text-gray-900 dark:text-white mb-1">
               Projekt <span className="text-red-500">*</span>
             </label>
             <select
               id="project"
               required
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+              className="input-glass"
               value={formData.projectId}
               onChange={(e) => setFormData({ ...formData, projectId: e.target.value })}
             >
@@ -121,14 +121,14 @@ const ExtraWorkForm: React.FC = () => {
 
           {/* Název vícepráce */}
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="name" className="block text-sm font-medium text-gray-900 dark:text-white mb-1">
               Název vícepráce <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
               id="name"
               required
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+              className="input-glass"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               placeholder="Např. Dodatečné základy pro přístavbu"
@@ -137,14 +137,14 @@ const ExtraWorkForm: React.FC = () => {
 
           {/* Popis */}
           <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="description" className="block text-sm font-medium text-gray-900 dark:text-white mb-1">
               Popis práce <span className="text-red-500">*</span>
             </label>
             <textarea
               id="description"
               required
               rows={4}
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+              className="input-glass"
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               placeholder="Popište provedenou vícepráci..."
@@ -154,25 +154,25 @@ const ExtraWorkForm: React.FC = () => {
           {/* Datum a čas práce */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label htmlFor="startDatetime" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="startDatetime" className="block text-sm font-medium text-gray-900 dark:text-white mb-1">
                 Začátek práce
               </label>
               <input
                 type="datetime-local"
                 id="startDatetime"
-                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+                className="input-glass"
                 value={formData.startDatetime}
                 onChange={(e) => setFormData({ ...formData, startDatetime: e.target.value })}
               />
             </div>
             <div>
-              <label htmlFor="endDatetime" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="endDatetime" className="block text-sm font-medium text-gray-900 dark:text-white mb-1">
                 Konec práce
               </label>
               <input
                 type="datetime-local"
                 id="endDatetime"
-                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+                className="input-glass"
                 value={formData.endDatetime}
                 onChange={(e) => setFormData({ ...formData, endDatetime: e.target.value })}
               />
@@ -181,15 +181,15 @@ const ExtraWorkForm: React.FC = () => {
 
           {/* Fotografie */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Fotografie
+            <label className="block text-sm font-medium text-gray-900 dark:text-white mb-1 flex items-center gap-2">
+              📷 Fotografie
             </label>
             <div className="mt-2">
-              <label className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer">
-                <svg className="-ml-1 mr-2 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <label className="btn-secondary inline-flex items-center gap-2 cursor-pointer group">
+                <svg className="w-5 h-5 group-hover:scale-110 transition-transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
                 </svg>
-                Přidat fotografie
+                📷 Přidat fotografie
                 <input
                   type="file"
                   multiple
@@ -204,7 +204,7 @@ const ExtraWorkForm: React.FC = () => {
             {photoPreviews.length > 0 && (
               <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
                 {photoPreviews.map((preview, index) => (
-                  <div key={index} className="relative aspect-square group">
+                  <div key={index} className="relative aspect-square group glass-card p-2 animate-scale-in">
                     <img
                       src={preview}
                       alt={`Náhled ${index + 1}`}
@@ -213,7 +213,7 @@ const ExtraWorkForm: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => removePhoto(index)}
-                      className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute top-3 right-3 p-2 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-all hover:scale-110 shadow-lg"
                     >
                       <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -227,13 +227,13 @@ const ExtraWorkForm: React.FC = () => {
 
           {/* Materiály */}
           <div>
-            <label htmlFor="materialText" className="block text-sm font-medium text-gray-700 mb-1">
-              Použité materiály
+            <label htmlFor="materialText" className="block text-sm font-medium text-gray-900 dark:text-white mb-1 flex items-center gap-2">
+              📦 Použité materiály
             </label>
             <textarea
               id="materialText"
               rows={4}
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+              className="input-glass"
               value={formData.materialText}
               onChange={(e) => setFormData({ ...formData, materialText: e.target.value })}
               placeholder="Např. 10 pytlů cementu, 2 m³ písku, 50 cihel..."
@@ -245,20 +245,29 @@ const ExtraWorkForm: React.FC = () => {
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-end space-x-3">
+        <div className="px-6 py-4 bg-gray-50/50 dark:bg-gray-800/30 border-t border-gray-200/50 dark:border-gray-700/50 flex items-center justify-end gap-3">
           <button
             type="button"
             onClick={() => navigate('/extra-work')}
-            className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 dark:bg-gray-700"
+            className="btn-secondary"
           >
-            Zrušit
+            ✕ Zrušit
           </button>
           <button
             type="submit"
             disabled={loading}
-            className="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50"
+            className="btn-primary inline-flex items-center gap-2"
           >
-            {loading ? 'Ukládám...' : 'Uložit jako koncept'}
+            {loading ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                Ukládám...
+              </>
+            ) : (
+              <>
+                💾 Uložit jako koncept
+              </>
+            )}
           </button>
         </div>
       </form>
