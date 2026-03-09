@@ -8,6 +8,7 @@ interface Material {
   id: number;
   name: string;
   unit: string;
+  project_id?: number | null;
 }
 
 interface SelectedMaterial {
@@ -25,14 +26,21 @@ const AddMaterialsToExtraWork: React.FC = () => {
   const [extraWork, setExtraWork] = useState<any>(null);
 
   useEffect(() => {
-    loadMaterials();
     loadExtraWork();
   }, [id]);
 
-  const loadMaterials = async () => {
+  // Načíst materiály po načtení vícepráce (potřebujeme project_id)
+  useEffect(() => {
+    if (extraWork?.project_id) {
+      loadMaterials(extraWork.project_id);
+    }
+  }, [extraWork]);
+
+  const loadMaterials = async (projectId: number) => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(`${API_URL}/materials`, {
+        params: { projectId },
         headers: { Authorization: `Bearer ${token}` }
       });
       setMaterials(response.data);
@@ -178,11 +186,28 @@ const AddMaterialsToExtraWork: React.FC = () => {
                         required
                       >
                         <option value="">Vyberte materiál</option>
-                        {materials.map(m => (
-                          <option key={m.id} value={m.id}>
-                            {m.name} ({m.unit})
-                          </option>
-                        ))}
+                        
+                        {/* Globální materiály */}
+                        {materials.filter(m => !m.project_id).length > 0 && (
+                          <optgroup label="📦 Globální materiály">
+                            {materials.filter(m => !m.project_id).map(m => (
+                              <option key={m.id} value={m.id}>
+                                {m.name} ({m.unit})
+                              </option>
+                            ))}
+                          </optgroup>
+                        )}
+                        
+                        {/* Projektové materiály */}
+                        {materials.filter(m => m.project_id).length > 0 && (
+                          <optgroup label="🏗️ Materiály projektu">
+                            {materials.filter(m => m.project_id).map(m => (
+                              <option key={m.id} value={m.id}>
+                                {m.name} ({m.unit})
+                              </option>
+                            ))}
+                          </optgroup>
+                        )}
                       </select>
                       <input
                         type="number"
