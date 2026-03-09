@@ -31,6 +31,12 @@ const UsersManagement: React.FC = () => {
     loadUsers();
   }, []);
 
+  const toArray = <T,>(value: any): T[] => {
+    if (Array.isArray(value)) return value;
+    if (Array.isArray(value?.data)) return value.data;
+    return [];
+  };
+
   const loadUsers = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -38,7 +44,8 @@ const UsersManagement: React.FC = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       // Map is_active to active for frontend
-      const mappedUsers = response.data.map((user: any) => ({
+      const rawUsers = toArray<any>(response.data);
+      const mappedUsers = rawUsers.map((user: any) => ({
         ...user,
         active: user.is_active
       }));
@@ -128,14 +135,16 @@ const UsersManagement: React.FC = () => {
   const handleToggleActive = async (userId: number, active: boolean) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.patch(
+      const response = await axios.patch(
         `${API_URL}/users/${userId}/toggle-active`,
         { active: !active },
         { headers: { Authorization: `Bearer ${token}` } }
       );
+      console.log('Toggle response:', response.data);
       loadUsers();
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Chyba při změně stavu uživatele');
+      console.error('Toggle error:', error);
+      alert(error.response?.data?.message || error.response?.data?.error || 'Chyba při změně stavu uživatele');
     }
   };
 
