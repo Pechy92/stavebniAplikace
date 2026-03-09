@@ -26,7 +26,7 @@ const MaterialsManagement: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [editingMaterial, setEditingMaterial] = useState<Material | null>(null);
-  const [selectedProjectId, setSelectedProjectId] = useState<string>('');
+  const [selectedProjectName, setSelectedProjectName] = useState<string>('');
   const [formData, setFormData] = useState({
     name: '',
     unit: '',
@@ -45,7 +45,7 @@ const MaterialsManagement: React.FC = () => {
 
   useEffect(() => {
     loadMaterials();
-  }, [selectedProjectId]);
+  }, [selectedProjectName, projects]);
 
   const toArray = <T,>(value: any): T[] => {
     if (Array.isArray(value)) return value;
@@ -82,7 +82,8 @@ const MaterialsManagement: React.FC = () => {
       setLoading(true);
       setError(null);
       const token = localStorage.getItem('token');
-      const params = selectedProjectId ? { projectId: selectedProjectId } : {};
+      const selectedProject = projects.find((p) => p.name === selectedProjectName);
+      const params = selectedProject ? { projectId: selectedProject.id } : {};
       const response = await axios.get(`${API_URL}/materials`, {
         headers: { Authorization: `Bearer ${token}` },
         params
@@ -118,7 +119,7 @@ const MaterialsManagement: React.FC = () => {
         unitPrice: '',
         category: '',
         sku: '',
-        projectId: selectedProjectId
+        projectId: ''
       });
     }
     setShowModal(true);
@@ -222,38 +223,25 @@ const MaterialsManagement: React.FC = () => {
     <div>
       <div className="mb-6 glass-card p-4">
         <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Filtr podle stavby</h3>
-        <div className="flex gap-2 flex-wrap">
-          <button
-            onClick={() => setSelectedProjectId('')}
-            className={`px-4 py-2 rounded-lg transition-all ${
-              selectedProjectId === '' 
-                ? 'bg-primary-500 text-white' 
-                : 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600'
-            }`}
-          >
-            🌍 Všechny materiály
-          </button>
-          {projects.map(project => (
-            <button
-              key={project.id}
-              onClick={() => setSelectedProjectId(project.id.toString())}
-              className={`px-4 py-2 rounded-lg transition-all whitespace-nowrap ${
-                selectedProjectId === project.id.toString()
-                  ? 'bg-primary-500 text-white'
-                  : 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600'
-              }`}
-            >
-              📍 {project.custom_id || project.name}
-            </button>
+        <select
+          className="input-glass max-w-md"
+          value={selectedProjectName}
+          onChange={(e) => setSelectedProjectName(e.target.value)}
+        >
+          <option value="">🌍 Všechny materiály</option>
+          {projects.map((project) => (
+            <option key={project.id} value={project.name}>
+              {project.name}
+            </option>
           ))}
-        </div>
+        </select>
       </div>
 
       <div className="mb-4 flex justify-between items-center">
         <div>
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-            {selectedProjectId 
-              ? `Materiály - ${getProjectName(parseInt(selectedProjectId))}`
+            {selectedProjectName
+              ? `Materiály - ${selectedProjectName}`
               : '🌍 Všechny materiály'}
           </h2>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
