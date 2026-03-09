@@ -265,23 +265,23 @@ const MaterialsManagement: React.FC = () => {
         </button>
       </div>
 
-      <div className="glass-card overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200/50 dark:divide-gray-700/50">
-          <thead className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-700/50">
+      <div className="glass-card overflow-x-auto">
+        <table className="w-full divide-y divide-gray-200/50 dark:divide-gray-700/50">
+          <thead className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-700/50 sticky top-0">
             <tr>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Název</th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Jednotka</th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Cena/j.</th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Kategorie</th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">SKU</th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Stavba</th>
-              <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Akce</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider min-w-max">Název</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap">Jednotka</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap">Cena/j.</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap">Kategorie</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap">SKU</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap">Stavba</th>
+              <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap sticky right-0 bg-gradient-to-r from-transparent to-gray-50 dark:to-gray-800/50">Akce</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200/50 dark:divide-gray-700/50">
             {materials.map((material) => (
               <tr key={material.id} className="hover:bg-white/50 dark:hover:bg-gray-800/30 transition-colors">
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white max-w-xs truncate" title={material.name}>
                   {material.name}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
@@ -299,7 +299,7 @@ const MaterialsManagement: React.FC = () => {
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
                   {getProjectName(material.project_id)}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-3">
+                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-3 sticky right-0 bg-white dark:bg-gray-900 bg-opacity-75 dark:bg-opacity-75 backdrop-blur">
                   <button
                     onClick={() => handleOpenModal(material)}
                     className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium transition-colors"
