@@ -1,12 +1,21 @@
 import { body, param, ValidationChain } from 'express-validator';
 
-// Email validace
+// Email validace (s normalizací - pro registraci)
 export const emailValidation = (): ValidationChain =>
   body('email')
     .trim()
     .isEmail()
     .withMessage('Neplatný formát emailu')
     .normalizeEmail()
+    .isLength({ max: 255 })
+    .withMessage('Email je příliš dlouhý');
+
+// Email validace pro login (bez normalizace - zachová + aliasy)
+export const emailValidationForLogin = (): ValidationChain =>
+  body('email')
+    .trim()
+    .isEmail()
+    .withMessage('Neplatný formát emailu')
     .isLength({ max: 255 })
     .withMessage('Email je příliš dlouhý');
 
@@ -90,9 +99,9 @@ export const registerValidation = [
   roleValidation()
 ];
 
-// Login validace
+// Login validace (bez normalizace emailu - podporuje + aliasy)
 export const loginValidation = [
-  emailValidation(),
+  emailValidationForLogin(),
   body('password')
     .trim()
     .notEmpty()
