@@ -101,6 +101,9 @@ const MaterialsManagement: React.FC = () => {
   const handleOpenModal = (material?: Material) => {
     if (material) {
       setEditingMaterial(material);
+      const projectName = material.project_id 
+        ? projects.find(p => p.id === material.project_id)?.name || ''
+        : '';
       setFormData({
         name: material.name,
         unit: material.unit || '',
@@ -108,7 +111,7 @@ const MaterialsManagement: React.FC = () => {
         unitPrice: material.unit_price?.toString() || '',
         category: material.category || '',
         sku: material.sku || '',
-        projectId: material.project_id?.toString() || ''
+        projectId: projectName
       });
     } else {
       setEditingMaterial(null);
@@ -135,6 +138,9 @@ const MaterialsManagement: React.FC = () => {
     
     try {
       const token = localStorage.getItem('token');
+      const selectedProject = formData.projectId 
+        ? projects.find(p => p.name === formData.projectId)
+        : null;
       const payload = {
         name: formData.name,
         unit: formData.unit || null,
@@ -142,7 +148,7 @@ const MaterialsManagement: React.FC = () => {
         unitPrice: formData.unitPrice ? parseFloat(formData.unitPrice) : null,
         category: formData.category || null,
         sku: formData.sku || null,
-        projectId: formData.projectId ? parseInt(formData.projectId) : null
+        projectId: selectedProject?.id || null
       };
       
       if (editingMaterial) {
@@ -356,8 +362,8 @@ const MaterialsManagement: React.FC = () => {
                       >
                         <option value="">🌍 Globální materiál (dostupný všem)</option>
                         {projects.map(project => (
-                          <option key={project.id} value={project.id}>
-                            📍 {project.custom_id || project.name}
+                          <option key={project.id} value={project.name}>
+                            {project.name}
                           </option>
                         ))}
                       </select>
