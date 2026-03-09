@@ -7,7 +7,7 @@ interface Material {
   name: string;
   unit: string;
   description: string | null;
-  unit_price: number | null;
+  unit_price: number | string | null;
   category: string | null;
   sku: string | null;
   project_id: number | null;
@@ -47,13 +47,26 @@ const MaterialsManagement: React.FC = () => {
     loadMaterials();
   }, [selectedProjectId]);
 
+  const toArray = <T,>(value: any): T[] => {
+    if (Array.isArray(value)) return value;
+    if (Array.isArray(value?.data)) return value.data;
+    return [];
+  };
+
+  const formatUnitPrice = (value: number | string | null) => {
+    if (value === null || value === undefined || value === '') return '-';
+    const numeric = Number(value);
+    if (!Number.isFinite(numeric)) return '-';
+    return `${numeric.toFixed(2)} Kč`;
+  };
+
   const loadProjects = async () => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(`${API_URL}/projects`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setProjects(response.data || []);
+      setProjects(toArray<Project>(response.data));
       setError(null);
     } catch (error: any) {
       console.error('Chyba při načítání projektů:', error);
@@ -74,7 +87,7 @@ const MaterialsManagement: React.FC = () => {
         headers: { Authorization: `Bearer ${token}` },
         params
       });
-      setMaterials(response.data || []);
+      setMaterials(toArray<Material>(response.data));
     } catch (error: any) {
       console.error('Chyba při načítání materiálů:', error);
       setError(`Chyba při načítání materiálů: ${error.message}`);
@@ -281,7 +294,7 @@ const MaterialsManagement: React.FC = () => {
                   {material.unit || '-'}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
-                  {material.unit_price ? `${material.unit_price.toFixed(2)} Kč` : '-'}
+                  {formatUnitPrice(material.unit_price)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
                   {material.category || '-'}
