@@ -79,7 +79,10 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
     const { email, first_name, last_name, phone, role, is_active, active } = req.body;
     
     // Accept both 'active' and 'is_active' parameter names
-    const activeStatus = is_active !== undefined ? is_active : active;
+    const activeValue = is_active !== undefined ? is_active : active;
+    
+    // Convert boolean to number (0 or 1) for MySQL tinyint
+    const activeStatus = activeValue !== undefined ? (activeValue ? 1 : 0) : 1;
 
     await pool.query(
       `UPDATE users 
@@ -103,7 +106,10 @@ export const toggleUserActive = async (req: AuthRequest, res: Response) => {
     const { active, is_active } = req.body;
     
     // Accept both 'active' and 'is_active' parameter names
-    const activeStatus = is_active !== undefined ? is_active : active;
+    const activeValue = is_active !== undefined ? is_active : active;
+    
+    // Convert boolean to number (0 or 1) for MySQL tinyint
+    const activeStatus = activeValue ? 1 : 0;
 
     await pool.query(
       'UPDATE users SET is_active = ?, updated_by = ? WHERE id = ?',
