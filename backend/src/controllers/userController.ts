@@ -105,21 +105,30 @@ export const toggleUserActive = async (req: AuthRequest, res: Response) => {
     const { id } = req.params;
     const { active, is_active } = req.body;
     
-    // Accept both 'active' and 'is_active' parameter names
-    const activeValue = is_active !== undefined ? is_active : active;
+    console.log('Toggle active request:', { id, active, is_active, body: req.body });
     
-    // Convert boolean to number (0 or 1) for MySQL tinyint
+    // Accept both 'active' and 'is_active' parameter names
+    let activeValue = is_active !== undefined ? is_active : active;
+    
+    // Handle various input types (boolean, string, number)
+    if (typeof activeValue === 'string') {
+      activeValue = activeValue === 'true' || activeValue === '1';
+    }
+    
+    // Convert to number (0 or 1) for MySQL tinyint
     const activeStatus = activeValue ? 1 : 0;
+    
+    console.log('Setting is_active to:', activeStatus);
 
     await pool.query(
       'UPDATE users SET is_active = ?, updated_by = ? WHERE id = ?',
       [activeStatus, req.user?.id, id]
     );
 
-    res.json({ message: 'Stav uživatele změněn' });
+    res.json({ message: 'Stav uživatele změněn', is_active: activeStatus });
   } catch (error) {
     console.error('Toggle active error:', error);
-    res.status(500).json({ error: 'Chyba při změně stavu uživatele' });
+    res.status(500).json({ error: 'Chyba při změně stavu uživatele', details: error instanceof Error ? error.message : String(error) });
   }
 };
 
