@@ -210,12 +210,12 @@ export async function createTables() {
       CREATE TABLE IF NOT EXISTS shift_workers (
         id INT PRIMARY KEY AUTO_INCREMENT,
         shift_id INT NOT NULL,
-        user_id INT NOT NULL,
+        worker_id INT NOT NULL,
         individual_instructions TEXT(2000),
         assigned_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (shift_id) REFERENCES shifts(id) ON DELETE CASCADE,
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-        UNIQUE KEY unique_shift_worker (shift_id, user_id)
+        FOREIGN KEY (worker_id) REFERENCES users(id) ON DELETE CASCADE,
+        UNIQUE KEY unique_shift_worker (shift_id, worker_id)
       )
     `);
 
