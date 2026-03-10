@@ -102,7 +102,7 @@ app.get('/health', (req, res) => {
 // Error handler
 app.use(errorHandler);
 
-// Inicializace databáze a spuštění serveru
+// Inicializace databáze a spuštění serveru - Force redeploy
 async function startServer() {
   try {
     await createTables();
