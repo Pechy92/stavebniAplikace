@@ -14,6 +14,8 @@ interface Project {
   address?: string;
   start_date?: string;
   planned_end_date?: string;
+  managers?: string | null;
+  foremen?: string | null;
 }
 
 const Dashboard: React.FC = () => {
@@ -214,6 +216,17 @@ const Dashboard: React.FC = () => {
                     📍 {project.address}
                   </p>
                 )}
+
+                <div className="text-sm text-gray-600 dark:text-gray-400 space-y-2 mb-4">
+                  <p className="line-clamp-2">
+                    <span className="font-semibold text-gray-700 dark:text-gray-300">Manažer:</span>{' '}
+                    {project.managers || 'Neobsazeno'}
+                  </p>
+                  <p className="line-clamp-2">
+                    <span className="font-semibold text-gray-700 dark:text-gray-300">Stavbyvedoucí:</span>{' '}
+                    {project.foremen || 'Neobsazeno'}
+                  </p>
+                </div>
 
                 <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1">
                   {project.start_date && (
