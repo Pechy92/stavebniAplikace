@@ -45,6 +45,11 @@ export const projectService = {
     return data;
   },
 
+  getOverview: async (id: number) => {
+    const { data } = await api.get(`/projects/${id}/overview`);
+    return data;
+  },
+
   create: async (projectData: any) => {
     const { data } = await api.post('/projects', projectData);
     return data;

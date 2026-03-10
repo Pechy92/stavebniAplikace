@@ -7,6 +7,7 @@ import Layout from './components/Layout';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import ProjectOverview from './pages/ProjectOverview';
 import ExtraWorkList from './pages/ExtraWorkList';
 import ExtraWorkDetail from './pages/ExtraWorkDetail';
 import ExtraWorkForm from './pages/ExtraWorkForm';
@@ -40,6 +41,7 @@ function App() {
             >
               <Route index element={<Navigate to="/dashboard" replace />} />
               <Route path="dashboard" element={<Dashboard />} />
+              <Route path="projects/:projectId/overview" element={<ProjectOverview />} />
               <Route path="extra-work" element={<ExtraWorkList />} />
               <Route path="extra-work/new" element={<ExtraWorkForm />} />
               <Route path="extra-work/:id/add-materials" element={<AddMaterialsToExtraWork />} />

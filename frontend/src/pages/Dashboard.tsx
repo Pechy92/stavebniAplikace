@@ -1,22 +1,33 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { extraWorkService } from '../services';
+import { extraWorkService, projectService } from '../services';
 import { ExtraWork } from '../types';
 import { useTranslation } from 'react-i18next';
 import { translationService } from '../services/translationService';
+
+interface Project {
+  id: number;
+  name: string;
+  custom_id: string;
+  status: string;
+  address?: string;
+  start_date?: string;
+  planned_end_date?: string;
+}
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
   const { t } = useTranslation();
   const [translatedExtraWorks, setTranslatedExtraWorks] = useState<ExtraWork[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadExtraWorks();
+    loadData();
   }, []);
 
-  const loadExtraWorks = async () => {
+  const loadData = async () => {
     try {
       const data = await extraWorkService.getAll();
       const recentWorks = data.slice(0, 5);
@@ -31,8 +42,18 @@ const Dashboard: React.FC = () => {
         }))
       );
       setTranslatedExtraWorks(translated);
+
+      // Pokud je manager, načti jeho projekty
+      if (user?.role === 'manager') {
+        try {
+          const allProjects = await projectService.getAll();
+          setProjects(allProjects || []);
+        } catch (error) {
+          console.error('Chyba při načítání projektů:', error);
+        }
+      }
     } catch (error) {
-      console.error('Chyba při načítání víceprací:', error);
+      console.error('Chyba při načítání dat:', error);
     } finally {
       setLoading(false);
     }
@@ -54,6 +75,17 @@ const Dashboard: React.FC = () => {
     return colors[status] || 'bg-gray-100 text-gray-800';
   };
 
+  const getProjectStatusColor = (status: string) => {
+    const colors: { [key: string]: string } = {
+      'preparation': 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+      'in_progress': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
+      'completed': 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+      'paused': 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
+      'cancelled': 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
+    };
+    return colors[status] || 'bg-gray-100 text-gray-800';
+  };
+
   return (
     <div className="px-4 sm:px-0 animate-slide-up">
       {/* Header with Glass Effect */}
@@ -69,7 +101,8 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Action Cards with Glassmorphism */}
+      {/* Action Cards with Glassmorphism - Only for non-managers */}
+      {user?.role !== 'manager' && (
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-8">
         {user?.role === 'worker' && (
           <Link
@@ -139,6 +172,72 @@ const Dashboard: React.FC = () => {
           </div>
         </Link>
       </div>
+      )}
+
+      {/* Manager Projects Section */}
+      {user?.role === 'manager' && (
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+          <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+          </svg>
+          Moje projekty
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {projects.length === 0 ? (
+            <div className="col-span-full glass-card p-8 text-center">
+              <p className="text-gray-500 dark:text-gray-400">Žádné projekty k dispozici</p>
+            </div>
+          ) : (
+            projects.map((project) => (
+              <Link
+                key={project.id}
+                to={`/projects/${project.id}/overview`}
+                className="group glass-card p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <p className="text-xs font-semibold text-primary-600 dark:text-primary-400 uppercase tracking-wider">
+                      {project.custom_id}
+                    </p>
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mt-1 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors line-clamp-2">
+                      {project.name}
+                    </h3>
+                  </div>
+                  <span className={`badge-glass text-xs font-semibold px-3 py-1 whitespace-nowrap ml-2 ${getProjectStatusColor(project.status)}`}>
+                    {project.status}
+                  </span>
+                </div>
+
+                {project.address && (
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-1">
+                    📍 {project.address}
+                  </p>
+                )}
+
+                <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1">
+                  {project.start_date && (
+                    <p>Zahájeno: {new Date(project.start_date).toLocaleDateString('cs-CZ')}</p>
+                  )}
+                  {project.planned_end_date && (
+                    <p>Term: {new Date(project.planned_end_date).toLocaleDateString('cs-CZ')}</p>
+                  )}
+                </div>
+
+                <div className="mt-4 pt-4 border-t border-white/20 dark:border-gray-700/50 flex items-center justify-between">
+                  <span className="text-sm font-medium text-primary-600 dark:text-primary-400">
+                    Podrobný přehled →
+                  </span>
+                  <svg className="w-4 h-4 text-primary-600 dark:text-primary-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </Link>
+            ))
+          )}
+        </div>
+      </div>
+      )}
 
       {/* Recent Extra Work with Glass Card */}
       <div className="glass-card overflow-hidden">
