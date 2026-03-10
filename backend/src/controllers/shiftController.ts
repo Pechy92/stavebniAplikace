@@ -114,11 +114,12 @@ export const createShift = async (req: AuthRequest, res: Response) => {
 
       // Získat seznam pracovníků včetně autora
       const workerIdsWithAuthor = [...new Set([...user_ids, req.user!.id])];
+      const placeholders = workerIdsWithAuthor.map(() => '?').join(',');
       const [workers] = await pool.query<RowDataPacket[]>(
         `SELECT DISTINCT u.id, u.email, u.first_name, u.last_name 
          FROM users u 
-         WHERE u.id IN (?)`,
-        [workerIdsWithAuthor]
+         WHERE u.id IN (${placeholders})`,
+        workerIdsWithAuthor
       );
 
       const actionUrl = `${process.env.FRONTEND_URL}/shifts/${shiftId}`;
