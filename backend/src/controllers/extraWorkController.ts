@@ -183,10 +183,8 @@ export const addMaterialsToExtraWork = async (req: AuthRequest, res: Response) =
       return res.status(400).json({ error: 'Materiály nejsou zadány správně' });
     }
 
-    // Smazat staré materiály
-    await connection.query('DELETE FROM extra_work_materials WHERE extra_work_id = ?', [id]);
-
-    // Přidat nové materiály
+    // Přidat nové materiály bez mazání původních.
+    // Pokud materiál už u vícepráce existuje, navýšíme množství.
     for (const material of materials) {
       if (!material.materialId || !material.quantity || material.quantity <= 0) {
         await connection.rollback();
@@ -204,6 +202,24 @@ export const addMaterialsToExtraWork = async (req: AuthRequest, res: Response) =
       }
 
       const unitPrice = (materialData as any[])[0]?.unit_price || 0;
+
+      const [existingRows] = await connection.query(
+        'SELECT id, quantity FROM extra_work_materials WHERE extra_work_id = ? AND material_id = ? LIMIT 1',
+        [id, material.materialId]
+      );
+
+      const existing = (existingRows as any[])[0];
+
+      if (existing) {
+        const newQuantity = Number(existing.quantity || 0) + Number(material.quantity);
+        await connection.query(
+          `UPDATE extra_work_materials
+           SET quantity = ?, unit_price_snapshot = ?, added_by = ?
+           WHERE id = ?`,
+          [newQuantity, unitPrice, req.user?.id, existing.id]
+        );
+        continue;
+      }
 
       await connection.query(
         `INSERT INTO extra_work_materials (extra_work_id, material_id, quantity, unit_price_snapshot, added_by)
