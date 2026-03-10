@@ -511,8 +511,12 @@ const ExtraWorkDetail: React.FC = () => {
               </button>
             )}
 
-            {/* Přidání materiálů stavbyvedoucím */}
-            {user?.role === 'foreman' && (extraWork.status === 'submitted_to_foreman' || extraWork.status === 'draft') && (
+            {/* Přidání/doplnění materiálů stavbyvedoucím */}
+            {user?.role === 'foreman' && (
+              extraWork.status === 'submitted_to_foreman' ||
+              extraWork.status === 'draft' ||
+              extraWork.status === 'returned_to_foreman'
+            ) && (
               <Link
                 to={`/extra-work/${extraWork.id}/add-materials`}
                 className="btn-secondary inline-flex items-center gap-2"
