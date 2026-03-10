@@ -239,18 +239,17 @@ export const getProjectOverview = async (req: AuthRequest, res: Response) => {
 
     const [extraWorkRows] = await pool.query(
       `SELECT
-         COUNT(DISTINCT ew.id) AS total_extra_works,
+         COUNT(*) AS total_extra_works,
          SUM(CASE WHEN ew.status = 'approved' THEN 1 ELSE 0 END) AS approved_extra_works,
          SUM(CASE WHEN ew.status = 'submitted_to_foreman' THEN 1 ELSE 0 END) AS waiting_foreman,
          SUM(CASE WHEN ew.status = 'submitted_to_manager' THEN 1 ELSE 0 END) AS waiting_manager,
          SUM(CASE WHEN ew.status IN ('returned_to_worker', 'returned_to_foreman') THEN 1 ELSE 0 END) AS returned_extra_works,
-         COALESCE(SUM(ewm.total_price), 0) AS total_material_cost,
-         COALESCE(SUM(ewm.quantity), 0) AS total_material_quantity,
-         COUNT(DISTINCT ewm.material_id) AS unique_material_types
+         COALESCE((SELECT SUM(total_price) FROM extra_work_materials WHERE extra_work_id IN (SELECT id FROM extra_work WHERE project_id = ?)), 0) AS total_material_cost,
+         COALESCE((SELECT SUM(quantity) FROM extra_work_materials WHERE extra_work_id IN (SELECT id FROM extra_work WHERE project_id = ?)), 0) AS total_material_quantity,
+         COALESCE((SELECT COUNT(DISTINCT material_id) FROM extra_work_materials WHERE extra_work_id IN (SELECT id FROM extra_work WHERE project_id = ?)), 0) AS unique_material_types
        FROM extra_work ew
-       LEFT JOIN extra_work_materials ewm ON ew.id = ewm.extra_work_id
        WHERE ew.project_id = ?`,
-      [projectId]
+      [projectId, projectId, projectId, projectId]
     );
 
     const [topMaterialsRows] = await pool.query(
@@ -266,8 +265,7 @@ export const getProjectOverview = async (req: AuthRequest, res: Response) => {
        JOIN materials m ON m.id = ewm.material_id
        WHERE ew.project_id = ?
        GROUP BY m.id, m.name, m.unit
-       ORDER BY total_cost DESC, total_quantity DESC
-       LIMIT 8`,
+       ORDER BY total_cost DESC, total_quantity DESC`,
       [projectId]
     );
 

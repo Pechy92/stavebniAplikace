@@ -131,7 +131,6 @@ const ProjectOverview: React.FC = () => {
     return colors[status] || 'bg-gray-100 text-gray-800';
   };
 
-  const maxMaterialCost = Math.max(...top_materials.map(m => m.total_cost), 1);
   const maxMonthlyShifts = Math.max(...monthly_trends.map(m => m.shifts_count), 1);
   const maxMonthlyCost = Math.max(...monthly_trends.map(m => m.material_cost), 1);
 
@@ -237,37 +236,47 @@ const ProjectOverview: React.FC = () => {
         </div>
       </div>
 
-      {/* Top Materials */}
+      {/* All Materials */}
       <div className="glass-card p-6 mb-8">
         <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
           <div className="w-1 h-6 bg-gradient-to-b from-primary-500 to-primary-600 rounded-full"></div>
-          Top 8 materiálů (dle nákladů)
+          Všechny použité materiály
         </h3>
         <div className="space-y-4">
           {top_materials.length === 0 ? (
             <p className="text-gray-500 dark:text-gray-400 text-center py-4">Žádné materiály ve vícepracích</p>
           ) : (
-            top_materials.map((material) => (
-              <div key={material.id}>
-                <div className="flex items-center justify-between mb-2">
-                  <div>
-                    <p className="font-medium text-gray-900 dark:text-white">{material.name}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      {material.total_quantity.toFixed(2)} {material.unit} • {material.used_in_extra_works} víceprací
-                    </p>
-                  </div>
-                  <p className="font-bold text-gray-900 dark:text-white whitespace-nowrap ml-4">
-                    {formatCurrency(material.total_cost)}
-                  </p>
-                </div>
-                <div className="w-full h-2 bg-gray-200/50 dark:bg-gray-700/50 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-primary-500 to-primary-600 rounded-full transition-all duration-300"
-                    style={{ width: `${(material.total_cost / maxMaterialCost) * 100}%` }}
-                  ></div>
-                </div>
-              </div>
-            ))
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-full divide-y divide-white/10 dark:divide-gray-700/50">
+                <thead className="bg-gray-50/50 dark:bg-gray-700/20">
+                  <tr>
+                    <th className="text-left px-4 py-3 text-sm font-bold text-gray-700 dark:text-gray-300">Materiál</th>
+                    <th className="text-right px-4 py-3 text-sm font-bold text-gray-700 dark:text-gray-300">Množství</th>
+                    <th className="text-right px-4 py-3 text-sm font-bold text-gray-700 dark:text-gray-300">Jednotka</th>
+                    <th className="text-right px-4 py-3 text-sm font-bold text-gray-700 dark:text-gray-300">Náklady</th>
+                    <th className="text-center px-4 py-3 text-sm font-bold text-gray-700 dark:text-gray-300">V vícepracích</th>
+                    <th className="text-right px-4 py-3 text-sm font-bold text-gray-700 dark:text-gray-300">% z celku</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/10 dark:divide-gray-700/50">
+                  {top_materials.map((material) => {
+                    const percentOfTotal = summary.total_material_cost > 0 
+                      ? (material.total_cost / summary.total_material_cost * 100).toFixed(1)
+                      : '0.0';
+                    return (
+                      <tr key={material.id} className="hover:bg-white/30 dark:hover:bg-gray-700/30 transition">
+                        <td className="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white">{material.name}</td>
+                        <td className="px-4 py-3 text-sm text-right text-gray-900 dark:text-white">{material.total_quantity.toFixed(2)}</td>
+                        <td className="px-4 py-3 text-sm text-right text-gray-600 dark:text-gray-400">{material.unit}</td>
+                        <td className="px-4 py-3 text-sm font-semibold text-right text-gray-900 dark:text-white">{formatCurrency(material.total_cost)}</td>
+                        <td className="px-4 py-3 text-sm text-center text-gray-600 dark:text-gray-400">{material.used_in_extra_works}</td>
+                        <td className="px-4 py-3 text-sm text-right text-primary-600 dark:text-primary-400 font-medium">{percentOfTotal}%</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       </div>
