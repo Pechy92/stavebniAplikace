@@ -210,12 +210,12 @@ export async function createTables() {
       CREATE TABLE IF NOT EXISTS shift_workers (
         id INT PRIMARY KEY AUTO_INCREMENT,
         shift_id INT NOT NULL,
-        worker_id INT NOT NULL,
+        user_id INT NOT NULL,
         individual_instructions TEXT(2000),
         assigned_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (shift_id) REFERENCES shifts(id) ON DELETE CASCADE,
-        FOREIGN KEY (worker_id) REFERENCES users(id) ON DELETE CASCADE,
-        UNIQUE KEY unique_shift_worker (shift_id, worker_id)
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        UNIQUE KEY unique_shift_worker (shift_id, user_id)
       )
     `);
 
@@ -351,6 +351,28 @@ export async function createTables() {
           ('Písek', 'Stavební písek', 450.00, 'm3', 'Stavební materiál')
       `);
       console.log('✅ Testovací materiály vytvořeny');
+    }
+
+    // Migration: Ensure shift_workers has user_id column (not worker_id)
+    try {
+      // Check if worker_id column exists
+      const [result] = await connection.query(
+        `SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS 
+         WHERE TABLE_NAME = 'shift_workers' AND COLUMN_NAME = 'worker_id'`
+      ) as any[];
+      
+      // If worker_id exists, rename it to user_id
+      if (result && result.length > 0) {
+        await connection.query(`
+          ALTER TABLE shift_workers 
+          CHANGE COLUMN worker_id user_id INT NOT NULL
+        `);
+        console.log('✅ Migration: Renamed worker_id to user_id in shift_workers');
+      }
+    } catch (migrationError: any) {
+      if (migrationError.code !== 'ER_DUP_FIELDNAME' && migrationError.code !== 'ER_BAD_FIELD_ERROR') {
+        console.warn('⚠️ Migration warning (non-fatal):', migrationError.message);
+      }
     }
     
   } catch (error) {
